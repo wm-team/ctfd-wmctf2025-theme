@@ -1,0 +1,179 @@
+<nav class="navbar navbar-expand-md fixed-top glass-effect">
+  <div class="container">
+    <a href="{{ url_for('views.static_html', route='/') }}" class="navbar-brand d-flex align-items-center">
+      {% if Configs.ctf_logo %}
+        <img
+            class="img-responsive ctf_logo me-2"
+            src="{{ url_for('views.files', path=Configs.ctf_logo) }}"
+            alt="{{ Configs.ctf_name }}"
+            style="height: 32px; max-height: 32px; width: auto; max-width: 120px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));"
+        >
+      {% endif %}
+      <span class="fw-bold text-gradient">{{ Configs.ctf_name }}</span>
+    </a>
+
+    <button
+        class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#base-navbars"
+        aria-controls="base-navbars" aria-expanded="false" aria-label="Toggle navigation"
+        style="box-shadow: none;"
+    >
+      <i class="fas fa-bars text-primary"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="base-navbars">
+      <ul class="navbar-nav me-auto">
+        {% for page in Plugins.user_menu_pages %}
+          <li class="nav-item">
+            <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ page.route }}" {% if page.link_target %}target="{{ page.link_target }}"{% endif %}>
+              {{ page.title }}
+            </a>
+          </li>
+        {% endfor %}
+
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ url_for('challenges.listing') }}">
+            <i class="fas fa-flag me-1"></i>
+            {% trans %}Challenges{% endtrans %}
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ url_for('scoreboard.listing') }}">
+            <i class="fas fa-trophy me-1"></i>
+            {% trans %}Scoreboard{% endtrans %}
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ url_for('users.listing') }}">
+            <i class="fas fa-user-friends me-1"></i>
+            {% trans %}Users{% endtrans %}
+          </a>
+        </li>
+
+        {% if Configs.user_mode == 'teams' %}
+          <li class="nav-item">
+            <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ url_for('teams.listing') }}">
+              <i class="fas fa-users me-1"></i>
+              {% trans %}Teams{% endtrans %}
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+
+      <hr class="d-sm-flex d-md-flex d-lg-none">
+
+      <ul class="navbar-nav ms-auto">
+        {% if authed() %}
+          <!-- Notifications -->
+          <li class="nav-item">
+            <a class="nav-link px-3 py-2 rounded-pill fw-500 position-relative" href="{{ url_for('views.notifications') }}" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Notifications{% endtrans %}">
+              <i class="fas fa-bell"></i>
+              <span x-data x-show="$store.unread_count > 0" x-text="$store.unread_count" class="badge rounded-pill bg-danger badge-notification position-absolute top-0 start-100 translate-middle"></span>
+            </a>
+          </li>
+
+          <!-- User menu dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle px-3 py-2 rounded-pill fw-500 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle me-1"></i>
+              <span class="d-none d-md-inline">{{ User.name }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="userDropdown" style="min-width: 200px;">
+              <li>
+                <a class="dropdown-item d-flex align-items-center py-2" href="{{ url_for('users.private') }}">
+                  <i class="fas fa-user me-2 text-primary"></i>
+                  {% trans %}Profile{% endtrans %}
+                </a>
+              </li>
+              
+              {% if Configs.user_mode == "teams" %}
+                <li>
+                  <a class="dropdown-item d-flex align-items-center py-2" href="{{ url_for('teams.private') }}">
+                    <i class="fas fa-users me-2 text-primary"></i>
+                    {% trans %}Team{% endtrans %}
+                  </a>
+                </li>
+              {% endif %}
+              
+              <li>
+                <a class="dropdown-item d-flex align-items-center py-2" href="{{ url_for('views.settings') }}">
+                  <i class="fas fa-cogs me-2 text-primary"></i>
+                  {% trans %}Settings{% endtrans %}
+                </a>
+              </li>
+              
+              {% if is_admin() %}
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item d-flex align-items-center py-2" href="{{ url_for('admin.view') }}">
+                    <i class="fas fa-wrench me-2 text-warning"></i>
+                    {% trans %}Admin Panel{% endtrans %}
+                  </a>
+                </li>
+              {% endif %}
+              
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center py-2 text-danger" href="{{ url_for('auth.logout') }}">
+                  <i class="fas fa-sign-out-alt me-2"></i>
+                  {% trans %}Logout{% endtrans %}
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        {% else %}
+          <!-- Guest menu -->
+          {% if registration_visible() %}
+            <li class="nav-item">
+              <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ url_for('auth.register') }}">
+                <i class="fas fa-user-plus me-1"></i>
+                {% trans %}Register{% endtrans %}
+              </a>
+            </li>
+          {% endif %}
+
+          <li class="nav-item">
+            <a class="btn btn-primary px-4 py-2 rounded-pill fw-500" href="{{ url_for('auth.login') }}">
+              <i class="fas fa-sign-in-alt me-1"></i>
+              {% trans %}Login{% endtrans %}
+            </a>
+          </li>
+        {% endif %}
+
+
+        <!-- Language selector -->
+        <li class="nav-item dropdown">
+          <button class="nav-link px-3 py-2 rounded-pill fw-500 border-0 bg-transparent dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Change language{% endtrans %}">
+            <i class="fas fa-language"></i>
+            <span class="d-none d-lg-inline ms-1">{{ get_locale().upper() }}</span>
+          </button>
+          <form x-data="LanguageForm">
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2">
+              {% set curr_lang = get_locale() %}
+              {%- for lang in Languages.names.items() %}
+              <li>
+                  <span class="dropdown-item d-flex align-items-center py-2 {{ 'bg-primary text-white' if (curr_lang == lang[0]) }}" @click="set" value="{{ lang[0] }}" style="cursor: pointer;">
+                    <i class="fas fa-globe me-2 {{ 'text-white' if (curr_lang == lang[0]) else 'text-primary' }}"></i>
+                    {{ lang[1] }}
+                    {% if curr_lang == lang[0] %}
+                      <i class="fas fa-check ms-auto"></i>
+                    {% endif %}
+                  </span>
+              </li>
+              {%- endfor %}
+            </ul>
+          </form>
+        </li>
+
+        <!-- Theme toggle -->
+        <li class="nav-item">
+          <button class="nav-link px-3 py-2 rounded-pill fw-500 border-0 bg-transparent theme-switch" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{% trans %}Toggle theme{% endtrans %}">
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

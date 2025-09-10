@@ -1,0 +1,58 @@
+<svg width="1920" height="600" viewBox="0 0 1920 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#007AFF;stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:#5856D6;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#FF3B30;stop-opacity:0.1" />
+    </linearGradient>
+    
+    <pattern id="circuitPattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="1.5" fill="#007AFF" opacity="0.3"/>
+      <circle cx="40" cy="25" r="1" fill="#5856D6" opacity="0.4"/>
+      <circle cx="65" cy="50" r="2" fill="#FF3B30" opacity="0.3"/>
+      <circle cx="25" cy="65" r="0.8" fill="#34C759" opacity="0.4"/>
+      <line x1="8" y1="8" x2="25" y2="25" stroke="#007AFF" stroke-width="0.3" opacity="0.3"/>
+      <line x1="40" y1="25" x2="65" y2="50" stroke="#5856D6" stroke-width="0.3" opacity="0.3"/>
+      <line x1="65" y1="50" x2="25" y2="65" stroke="#FF3B30" stroke-width="0.3" opacity="0.3"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1920" height="600" fill="url(#heroGradient)"/>
+  
+  <!-- Circuit pattern overlay -->
+  <rect width="1920" height="600" fill="url(#circuitPattern)" opacity="0.4"/>
+  
+  <!-- Geometric shapes -->
+  <g opacity="0.08">
+    <!-- Large circles -->
+    <circle cx="250" cy="150" r="80" fill="#007AFF"/>
+    <circle cx="1650" cy="120" r="60" fill="#5856D6"/>
+    <circle cx="1450" cy="480" r="100" fill="#FF3B30"/>
+    <circle cx="150" cy="550" r="50" fill="#34C759"/>
+    
+    <!-- Hexagons -->
+    <polygon points="700,80 740,100 740,140 700,160 660,140 660,100" fill="#007AFF"/>
+    <polygon points="1100,320 1150,345 1150,395 1100,420 1050,395 1050,345" fill="#5856D6"/>
+    <polygon points="350,400 400,425 400,475 350,500 300,475 300,425" fill="#FF3B30"/>
+  </g>
+  
+  <!-- Floating particles -->
+  <g opacity="0.3">
+    <circle cx="80" cy="80" r="2" fill="#007AFF">
+      <animate attributeName="cy" values="80;60;80" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="400" cy="160" r="1.5" fill="#5856D6">
+      <animate attributeName="cy" values="160;140;160" dur="5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="800" cy="240" r="3" fill="#FF3B30">
+      <animate attributeName="cy" values="240;215;240" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1200" cy="200" r="2" fill="#34C759">
+      <animate attributeName="cy" values="200;180;200" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1600" cy="320" r="2.5" fill="#FF9500">
+      <animate attributeName="cy" values="320;295;320" dur="3.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

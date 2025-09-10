@@ -1,0 +1,199 @@
+{
+  "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-400-normal.woff2": {
+    "file": "assets/lato-latin-400-normal.918b7dc3.woff2",
+    "src": "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-400-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-ext-400-normal.woff2": {
+    "file": "assets/lato-latin-ext-400-normal.1c2fc265.woff2",
+    "src": "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-ext-400-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-ext-700-normal.woff2": {
+    "file": "assets/lato-latin-ext-700-normal.4ef7cd3d.woff2",
+    "src": "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-ext-700-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-ext-400-normal.woff2": {
+    "file": "assets/raleway-cyrillic-ext-400-normal.1a60d844.woff2",
+    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-ext-400-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-700-normal.woff2": {
+    "file": "assets/lato-latin-700-normal.c447dd76.woff2",
+    "src": "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-700-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-400-normal.woff2": {
+    "file": "assets/raleway-cyrillic-400-normal.679eb908.woff2",
+    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-400-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-vietnamese-400-normal.woff2": {
+    "file": "assets/raleway-vietnamese-400-normal.917d91f1.woff2",
+    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-vietnamese-400-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-latin-ext-400-normal.woff2": {
+    "file": "assets/raleway-latin-ext-400-normal.293dc7f5.woff2",
+    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-latin-ext-400-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-latin-400-normal.woff2": {
+    "file": "assets/raleway-latin-400-normal.c78a1da5.woff2",
+    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-latin-400-normal.woff2"
+  },
+  "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-all-400-normal.woff": {
+    "file": "assets/lato-all-400-normal.8844f83a.woff",
+    "src": "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-all-400-normal.woff"
+  },
+  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-all-400-normal.woff": {
+    "file": "assets/raleway-all-400-normal.e0fbe643.woff",
+    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-all-400-normal.woff"
+  },
+  "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-all-700-normal.woff": {
+    "file": "assets/lato-all-700-normal.4bfd21d1.woff",
+    "src": "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-all-700-normal.woff"
+  },
+  "assets/js/index.js": {
+    "file": "assets/index.35173d3e.js",
+    "src": "assets/js/index.js",
+    "isEntry": true
+  },
+  "assets/js/page.js": {
+    "file": "assets/page.8277832c.js",
+    "src": "assets/js/page.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "assets/js/setup.js": {
+    "file": "assets/setup.ca08e625.js",
+    "src": "assets/js/setup.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "assets/js/settings.js": {
+    "file": "assets/settings.a07447c2.js",
+    "src": "assets/js/settings.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js",
+      "_clipboard.5e7677b4.js"
+    ]
+  },
+  "assets/js/challenges.js": {
+    "file": "assets/challenges.b49805a2.js",
+    "src": "assets/js/challenges.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "assets/js/scoreboard.js": {
+    "file": "assets/scoreboard.f9c3c0a6.js",
+    "src": "assets/js/scoreboard.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js",
+      "_index.7babac07.js",
+      "_echarts.b415bb2f.js"
+    ]
+  },
+  "assets/js/notifications.js": {
+    "file": "assets/notifications.58a4c433.js",
+    "src": "assets/js/notifications.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "assets/js/teams/public.js": {
+    "file": "assets/teams_public.fcba864d.js",
+    "src": "assets/js/teams/public.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js",
+      "_userscore.e3311689.js",
+      "_index.7babac07.js",
+      "_echarts.b415bb2f.js"
+    ]
+  },
+  "assets/js/teams/private.js": {
+    "file": "assets/teams_private.a41765f7.js",
+    "src": "assets/js/teams/private.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js",
+      "_clipboard.5e7677b4.js",
+      "_userscore.e3311689.js",
+      "_index.7babac07.js",
+      "_echarts.b415bb2f.js"
+    ]
+  },
+  "assets/js/teams/list.js": {
+    "file": "assets/teams_list.4eb1af10.js",
+    "src": "assets/js/teams/list.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "assets/js/users/public.js": {
+    "file": "assets/users_public.778bbeca.js",
+    "src": "assets/js/users/public.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js",
+      "_userscore.e3311689.js",
+      "_index.7babac07.js",
+      "_echarts.b415bb2f.js"
+    ]
+  },
+  "assets/js/users/private.js": {
+    "file": "assets/users_private.283027bd.js",
+    "src": "assets/js/users/private.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js",
+      "_userscore.e3311689.js",
+      "_index.7babac07.js",
+      "_echarts.b415bb2f.js"
+    ]
+  },
+  "assets/js/users/list.js": {
+    "file": "assets/users_list.9fc7ea6a.js",
+    "src": "assets/js/users/list.js",
+    "isEntry": true,
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "assets/js/color_mode_switcher.js": {
+    "file": "assets/color_mode_switcher.52334129.js",
+    "src": "assets/js/color_mode_switcher.js",
+    "isEntry": true
+  },
+  "_echarts.b415bb2f.js": {
+    "file": "assets/echarts.b415bb2f.js"
+  },
+  "_clipboard.5e7677b4.js": {
+    "file": "assets/clipboard.5e7677b4.js",
+    "imports": [
+      "assets/js/index.js"
+    ]
+  },
+  "_index.7babac07.js": {
+    "file": "assets/index.7babac07.js",
+    "imports": [
+      "_echarts.b415bb2f.js"
+    ]
+  },
+  "_userscore.e3311689.js": {
+    "file": "assets/userscore.e3311689.js",
+    "imports": [
+      "assets/js/index.js",
+      "_index.7babac07.js"
+    ]
+  },
+  "assets/scss/main.scss": {
+    "file": "assets/main.bcd8272e.css",
+    "src": "assets/scss/main.scss",
+    "isEntry": true
+  }
+}

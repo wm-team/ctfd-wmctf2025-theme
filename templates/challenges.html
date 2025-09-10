@@ -1,0 +1,886 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <!-- Compact Hero Section -->
+  <div class="jumbotron">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-12 text-center">
+          <h1 class="display-5 fw-bold mb-2 slide-up">
+            <i class="fas fa-flag text-primary me-2"></i>
+            {% trans %}Challenges{% endtrans %}
+          </h1>
+          <p class="lead mb-0 slide-up" style="animation-delay: 0.1s;">
+            {% trans %}Test your skills and solve challenging problems{% endtrans %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid px-4 py-3">
+    <!-- Error messages -->
+    <div class="row mb-3">
+      <div class="col-12">
+        {% include "components/errors.html" %}
+      </div>
+    </div>
+
+    <!-- Three Column Layout -->
+    <div class="row g-4" 
+         x-data="{
+           ...ChallengeBoard(),
+           selectedCategory: null,
+           
+           getFilteredCategories() {
+             if (this.selectedCategory) {
+               return [this.selectedCategory];
+             }
+             return this.getCategories();
+           },
+           
+           getTotalChallenges() {
+             if (!this.loaded || !this.challenges) return 0;
+             return this.challenges.length;
+           },
+           
+           getCategoryIcon(category) {
+             const icons = {
+               'web': 'fas fa-globe',
+               'crypto': 'fas fa-lock',
+               'pwn': 'fas fa-bug',
+               'reverse': 'fas fa-cogs',
+               'forensics': 'fas fa-search',
+               'misc': 'fas fa-puzzle-piece',
+               'binary': 'fas fa-file-code',
+               'steganography': 'fas fa-eye',
+               'osint': 'fas fa-satellite',
+               'network': 'fas fa-network-wired',
+               'mobile': 'fas fa-mobile-alt',
+               'blockchain': 'fas fa-link',
+               'ai': 'fas fa-robot',
+               'iot': 'fas fa-microchip'
+             };
+             const key = category.toLowerCase();
+             return icons[key] || 'fas fa-folder';
+           },
+           
+           getCategoryColor(category) {
+             const colors = {
+               'web': 'text-primary',
+               'crypto': 'text-secondary', 
+               'pwn': 'text-danger',
+               'reverse': 'text-success',
+               'forensics': 'text-warning',
+               'misc': 'text-muted',
+               'binary': 'text-info',
+               'steganography': 'text-dark',
+               'osint': 'text-primary',
+               'network': 'text-success',
+               'mobile': 'text-secondary'
+             };
+             const key = category.toLowerCase();
+             return colors[key] || 'text-info';
+           },
+           
+           getCategoryBadgeClass(category) {
+             const classes = {
+               'web': 'bg-primary-subtle text-primary',
+               'crypto': 'bg-secondary-subtle text-secondary',
+               'pwn': 'bg-danger-subtle text-danger', 
+               'reverse': 'bg-success-subtle text-success',
+               'forensics': 'bg-warning-subtle text-warning',
+               'misc': 'bg-light text-muted',
+               'binary': 'bg-info-subtle text-info',
+               'steganography': 'bg-dark-subtle text-dark',
+               'osint': 'bg-primary-subtle text-primary',
+               'network': 'bg-success-subtle text-success',
+               'mobile': 'bg-secondary-subtle text-secondary'
+             };
+             const key = category.toLowerCase();
+             return classes[key] || 'bg-info-subtle text-info';
+           }
+         }" 
+         @load-challenges.window="loadChallenges()" 
+         @load-challenge.window="loadChallenge($event.detail)">
+      
+      <!-- Challenge Modal -->
+      <div x-ref="challengeWindow" id="challenge-window" class="modal fade" tabindex="-1" role="dialog" x-data="" x-html="$store.challenge.data.view"></div>
+
+      <!-- Left Sidebar - Category Filter -->
+      <div class="col-lg-2 col-md-3">
+        <div class="category-sidebar sticky-top" style="top: 90px;">
+          <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-light border-0 py-3">
+              <h6 class="card-title mb-0 fw-bold">
+                <i class="fas fa-filter me-2 text-primary"></i>
+                {% trans %}Challenges{% endtrans %}
+              </h6>
+            </div>
+            <div class="card-body p-0">
+              <div x-show="loaded" class="category-list">
+                <!-- All Categories Option -->
+                <button 
+                  class="category-filter-btn w-100 text-start p-3 border-0 bg-transparent"
+                  :class="!selectedCategory ? 'active' : ''"
+                  @click="selectedCategory = null"
+                >
+                  <i class="fas fa-th-large me-2 text-primary"></i>
+                  {% trans %}All Categories{% endtrans %}
+                  <span class="badge bg-primary-subtle text-primary ms-auto" x-text="getTotalChallenges()"></span>
+                </button>
+                
+                <!-- Individual Categories -->
+                <template x-for="(category, idx) in getCategories()" :key="idx">
+                  <button 
+                    class="category-filter-btn w-100 text-start p-3 border-0 bg-transparent"
+                    :class="selectedCategory === category ? 'active' : ''"
+                    @click="selectedCategory = category"
+                  >
+                    <i class="me-2" :class="getCategoryIcon(category) + ' ' + getCategoryColor(category)"></i>
+                    <span x-text="category"></span>
+                    <span class="badge ms-auto" :class="getCategoryBadgeClass(category)" x-text="getChallenges(category).length"></span>
+                  </button>
+                </template>
+              </div>
+              
+              <!-- Loading state for sidebar -->
+              <div x-show="!loaded" class="text-center py-4">
+                <div class="spinner-container">
+                  <div class="spinner-circle"></div>
+                  <div class="spinner-circle"></div>
+                  <div class="spinner-circle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content - Challenge Grid -->
+      <div class="col-lg-7 col-md-6">
+        <div class="challenges-main">
+          <!-- Loading State -->
+          <div x-show="!loaded" class="text-center py-5">
+            <div class="spinner-container mb-3">
+              <div class="spinner-circle"></div>
+              <div class="spinner-circle"></div>
+              <div class="spinner-circle"></div>
+            </div>
+            <p class="text-muted">{% trans %}Loading challenges...{% endtrans %}</p>
+          </div>
+
+          <!-- Challenge Grid -->
+          <div x-show="loaded">
+            <template x-for="(category, idx) in getFilteredCategories()" :key="idx">
+              <div class="challenge-category mb-4" x-show="!selectedCategory || selectedCategory === category">
+                <!-- Category Header (only show when not filtering) -->
+                <div x-show="!selectedCategory" class="category-header mb-3 p-3 rounded-3 glass-effect">
+                  <div class="d-flex align-items-center">
+                    <div class="category-icon me-3">
+                      <i :class="getCategoryIcon(category) + ' ' + getCategoryColor(category)" style="font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                      <h4 class="mb-1 fw-bold" x-text="category"></h4>
+                      <small class="text-muted">
+                        <span x-text="getChallenges(category).length"></span> {% trans %}challenges{% endtrans %}
+                        · <span x-text="getChallenges(category).filter(c => c.solved_by_me).length"></span> {% trans %}solved{% endtrans %}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Challenge Cards -->
+                <div class="row g-3">
+                  <template x-for="(c, challengeIdx) in getChallenges(category)" :key="c.id">
+                    <div class="col-sm-6 col-xl-4">
+                      <div 
+                        class="challenge-card h-100 position-relative"
+                        :class="[
+                          c.solved_by_me ? 'challenge-solved' : '',
+                          'difficulty-' + (c.value <= 100 ? 'easy' : c.value <= 300 ? 'medium' : 'hard'),
+                          'category-' + category.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                          ...c.tags.map((tag) => `tag-${tag.value.replace(/ /g, '-')}`),
+                        ]"
+                        @click="loadChallenge(c.id)"
+                      >
+                        <!-- Solved Badge -->
+                        <div x-show="c.solved_by_me" class="solved-badge position-absolute top-0 end-0 m-2">
+                          <i class="fas fa-check-circle text-success"></i>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="card-body p-3 h-100 d-flex flex-column">
+                          <!-- Challenge Name -->
+                          <h6 class="card-title fw-bold mb-2 text-truncate" x-text="c.name"></h6>
+                          
+                          <!-- Points and Solve Count -->
+                          <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-gradient-primary px-2 py-1 rounded-pill fw-bold small">
+                              <i class="fas fa-star me-1"></i>
+                              <span x-text="c.value"></span> pts
+                            </span>
+                            <span class="badge bg-light text-muted px-2 py-1 rounded-pill small">
+                              <i class="fas fa-users me-1"></i>
+                              <span x-text="c.solves || 0"></span> {% trans %}solved{% endtrans %}
+                            </span>
+                          </div>
+
+                          <!-- Difficulty and Blood Badges Row -->
+                          <div class="d-flex justify-content-between align-items-center mb-2">
+                            <!-- Difficulty Indicator -->
+                            <div class="difficulty-indicator">
+                              <template x-if="c.value <= 100">
+                                <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill small">
+                                  <i class="fas fa-seedling me-1"></i>
+                                  {% trans %}Easy{% endtrans %}
+                                </span>
+                              </template>
+                              <template x-if="c.value > 100 && c.value <= 300">
+                                <span class="badge bg-warning-subtle text-warning px-2 py-1 rounded-pill small">
+                                  <i class="fas fa-fire me-1"></i>
+                                  {% trans %}Medium{% endtrans %}
+                                </span>
+                              </template>
+                              <template x-if="c.value > 300">
+                                <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill small">
+                                  <i class="fas fa-skull me-1"></i>
+                                  {% trans %}Hard{% endtrans %}
+                                </span>
+                              </template>
+                            </div>
+                            
+                            <!-- First Blood Icons -->
+                            <div class="blood-badges" x-show="c.solves && c.solves > 0">
+                              <template x-if="c.solves && c.solves >= 1">
+                                <i class="fas fa-medal first-blood me-1" title="First Blood" style="font-size: 1rem;"></i>
+                              </template>
+                              <template x-if="c.solves && c.solves >= 2">
+                                <i class="fas fa-medal second-blood me-1" title="Second Blood" style="font-size: 1rem;"></i>
+                              </template>
+                              <template x-if="c.solves && c.solves >= 3">
+                                <i class="fas fa-medal third-blood me-1" title="Third Blood" style="font-size: 1rem;"></i>
+                              </template>
+                            </div>
+                          </div>
+
+                          <!-- Action Button -->
+                          <button 
+                            class="btn btn-outline-primary w-100 rounded-pill fw-500 mt-auto btn-sm"
+                            :class="c.solved_by_me ? 'btn-outline-success' : 'btn-outline-primary'"
+                            type="button"
+                          >
+                            <template x-if="!c.solved_by_me">
+                              <span><i class="fas fa-play me-1"></i>{% trans %}Start{% endtrans %}</span>
+                            </template>
+                            <template x-if="c.solved_by_me">
+                              <span><i class="fas fa-check me-1"></i>{% trans %}Solved{% endtrans %}</span>
+                            </template>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar - User Info -->
+      <div class="col-lg-3 col-md-3">
+        <div class="user-sidebar sticky-top" style="top: 90px;">
+          <!-- User Stats Card -->
+            <div class="card border-0 shadow-sm rounded-3 mb-3" x-data="UserStats" x-init="loadUserStats()">
+              <div class="card-header text-center py-3 user-header">
+                <h6 class="mb-1 fw-bold">{{ User.name }}</h6>
+                <small class="opacity-75">{% trans %}Competitor{% endtrans %}</small>
+              </div>
+            <div class="card-body p-3">
+              <div class="row g-3 text-center">
+                <div class="col-4">
+                  <div class="stat-item">
+                    <div class="stat-number fw-bold text-primary" x-text="userScore || '{{ User.score }}'">{{ User.score }}</div>
+                    <div class="stat-label small text-muted">{% trans %}Points{% endtrans %}</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="stat-item">
+                    <div class="stat-number fw-bold text-success" x-text="solvedCount || 0">0</div>
+                    <div class="stat-label small text-muted">{% trans %}Solved{% endtrans %}</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="stat-item">
+                    <div class="stat-number fw-bold text-warning" x-text="userRank || '#{{ User.place or '-' }}'">#{{ User.place or '-' }}</div>
+                    <div class="stat-label small text-muted">{% trans %}Rank{% endtrans %}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div class="mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <small class="text-muted">{% trans %}Progress{% endtrans %}</small>
+                  <small class="text-muted">
+                    <span x-text="solvedCount || 0">0</span> / <span x-text="totalChallenges || 0">0</span>
+                  </small>
+                </div>
+                <div class="progress" style="height: 6px;">
+                  <div class="progress-bar bg-primary" 
+                       :style="{ width: totalChallenges > 0 ? ((solvedCount / totalChallenges) * 100) + '%' : '0%' }">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity & Notifications Card -->
+          <div class="card border-0 shadow-sm rounded-3" x-data="ActivityFeed" x-init="loadActivityData()">
+            <div class="card-header border-0 py-3">
+              <!-- Tab Navigation -->
+              <nav class="nav nav-pills nav-fill" role="tablist">
+                <button 
+                  class="nav-link rounded-pill fw-500 px-3 py-2" 
+                  :class="activeTab === 'notifications' ? 'active' : ''"
+                  @click="activeTab = 'notifications'"
+                  type="button"
+                >
+                  <i class="fas fa-bell me-1"></i>
+                  {% trans %}Notifications{% endtrans %}
+                  <span x-show="unreadCount > 0" class="badge bg-danger ms-1 rounded-pill" x-text="unreadCount"></span>
+                </button>
+                <button 
+                  class="nav-link rounded-pill fw-500 px-3 py-2" 
+                  :class="activeTab === 'activity' ? 'active' : ''"
+                  @click="activeTab = 'activity'; loadRecentSolves()"
+                  type="button"
+                >
+                  <i class="fas fa-activity me-1"></i>
+                  {% trans %}Activity{% endtrans %}
+                </button>
+              </nav>
+            </div>
+            
+            <div class="card-body p-3" style="min-height: 200px;">
+              <!-- Notifications Tab Content -->
+              <div x-show="activeTab === 'notifications'" x-transition>
+                <div x-show="notifications.length === 0" class="text-center text-muted py-3">
+                  <i class="fas fa-bell-slash mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                  <p class="mb-0 small">{% trans %}No notifications yet{% endtrans %}</p>
+                </div>
+                
+                <div x-show="notifications.length > 0">
+                  <template x-for="notification in notifications.slice(0, 3)" :key="notification.id">
+                    <div class="notification-item d-flex align-items-start mb-3 pb-2 border-bottom">
+                      <div class="notification-icon me-2 mt-1">
+                        <i class="fas fa-info-circle text-info"></i>
+                      </div>
+                      <div class="notification-content flex-grow-1">
+                        <div class="notification-title small fw-semibold" x-text="notification.title"></div>
+                        <div class="notification-text small text-muted" x-text="notification.content"></div>
+                        <div class="notification-time small text-muted mt-1" x-text="formatTime(notification.date)"></div>
+                      </div>
+                    </div>
+                  </template>
+                  
+                  <div class="text-center mt-3">
+                    <a href="{{ url_for('views.notifications') }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                      <i class="fas fa-bell me-1"></i>
+                      {% trans %}View All{% endtrans %}
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Activity Tab Content -->
+              <div x-show="activeTab === 'activity'" x-transition>
+                <div x-show="recentSolves.length === 0" class="text-center text-muted py-3">
+                  <i class="fas fa-chart-line mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                  <p class="mb-0 small">{% trans %}No recent activity{% endtrans %}</p>
+                </div>
+                
+                <div x-show="recentSolves.length > 0">
+                  <template x-for="solve in recentSolves.slice(0, 5)" :key="solve.id">
+                    <div class="activity-item d-flex align-items-center mb-3 pb-2 border-bottom">
+                      <div class="activity-icon me-2">
+                        <i class="fas fa-flag text-success"></i>
+                      </div>
+                      <div class="activity-content flex-grow-1">
+                        <div class="activity-user small fw-semibold" x-text="solve.user"></div>
+                        <div class="activity-challenge small text-muted">
+                          {% trans %}solved{% endtrans %} <span x-text="solve.challenge"></span>
+                        </div>
+                        <div class="activity-time small text-muted" x-text="formatTime(solve.date)"></div>
+                      </div>
+                      <div class="activity-points">
+                        <span class="badge bg-primary-subtle text-primary rounded-pill small" x-text="solve.value + ' pts'"></span>
+                      </div>
+                    </div>
+                  </template>
+                  
+                  <div class="text-center mt-3">
+                    <a href="{{ url_for('scoreboard.listing') }}" class="btn btn-outline-success btn-sm rounded-pill">
+                      <i class="fas fa-chart-line me-1"></i>
+                      {% trans %}View Scoreboard{% endtrans %}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* User Header Styles */
+    .user-header {
+      background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%) !important;
+      color: white !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-bs-theme="dark"] .user-header {
+      background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%) !important;
+      color: white !important;
+    }
+
+    /* Three Column Layout Styles */
+    .category-sidebar {
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .user-sidebar {
+      /* 移除固定高度和滚动条，让它跟随页面滚动 */
+      min-height: auto;
+    }
+
+    .challenges-main {
+      /* 移除固定高度和滚动条，让它跟随页面滚动 */
+      min-height: auto;
+    }
+
+    /* Category Filter Buttons */
+    .category-filter-btn {
+      transition: all 0.2s ease;
+      border-bottom: 1px solid var(--light-border);
+    }
+
+    .category-filter-btn:hover {
+      background: rgba(0, 122, 255, 0.05) !important;
+    }
+
+    .category-filter-btn.active {
+      background: rgba(0, 122, 255, 0.1) !important;
+      border-left: 4px solid var(--wmctf-primary);
+      font-weight: 600;
+    }
+
+    .category-filter-btn:last-child {
+      border-bottom: none;
+    }
+
+    /* Dark mode adjustments for category sidebar */
+    [data-bs-theme="dark"] .category-filter-btn {
+      color: var(--dark-text) !important;
+      border-bottom-color: var(--dark-border);
+    }
+
+    [data-bs-theme="dark"] .category-filter-btn:hover {
+      background: rgba(0, 122, 255, 0.15) !important;
+      color: var(--wmctf-primary) !important;
+    }
+
+    [data-bs-theme="dark"] .category-filter-btn.active {
+      background: rgba(0, 122, 255, 0.2) !important;
+      color: var(--wmctf-primary) !important;
+    }
+
+    /* Category Colors */
+    .category-web { border-left-color: #007AFF !important; }
+    .category-crypto { border-left-color: #5856D6 !important; }
+    .category-pwn { border-left-color: #FF3B30 !important; }
+    .category-reverse { border-left-color: #34C759 !important; }
+    .category-forensics { border-left-color: #FF9500 !important; }
+    .category-misc { border-left-color: #8E8E93 !important; }
+
+    /* Challenge Card Styles - Compact */
+    .challenge-card {
+      background: var(--light-card);
+      border: 2px solid var(--light-border);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      position: relative;
+      animation: slideUp 0.4s ease-out both;
+      min-height: 140px;
+    }
+
+    /* Blood Badges Styling */
+    .blood-badges {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* First Blood - Gold with glow */
+    .first-blood {
+      color: #FFD700 !important;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+      filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.4));
+      animation: goldGlow 2s ease-in-out infinite;
+    }
+
+    /* Second Blood - Silver with glow */
+    .second-blood {
+      color: #C0C0C0 !important;
+      text-shadow: 0 0 10px rgba(192, 192, 192, 0.8);
+      filter: drop-shadow(0 2px 4px rgba(192, 192, 192, 0.4));
+      animation: silverGlow 2.5s ease-in-out infinite;
+    }
+
+    /* Third Blood - Bronze with glow */
+    .third-blood {
+      color: #CD7F32 !important;
+      text-shadow: 0 0 10px rgba(205, 127, 50, 0.8);
+      filter: drop-shadow(0 2px 4px rgba(205, 127, 50, 0.4));
+      animation: bronzeGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes goldGlow {
+      0%, 100% { 
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+      }
+      50% { 
+        transform: scale(1.1);
+        text-shadow: 0 0 15px rgba(255, 215, 0, 1);
+      }
+    }
+
+    @keyframes silverGlow {
+      0%, 100% { 
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(192, 192, 192, 0.8);
+      }
+      50% { 
+        transform: scale(1.05);
+        text-shadow: 0 0 15px rgba(192, 192, 192, 1);
+      }
+    }
+
+    @keyframes bronzeGlow {
+      0%, 100% { 
+        transform: scale(1);
+        text-shadow: 0 0 10px rgba(205, 127, 50, 0.8);
+      }
+      50% { 
+        transform: scale(1.05);
+        text-shadow: 0 0 15px rgba(205, 127, 50, 1);
+      }
+    }
+
+    .challenge-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--wmctf-primary);
+    }
+
+    .challenge-card.challenge-solved {
+      border-color: var(--wmctf-success);
+      background: linear-gradient(135deg, rgba(52, 199, 89, 0.05) 0%, rgba(52, 199, 89, 0.1) 100%);
+    }
+
+    .challenge-card.challenge-solved:hover {
+      border-color: var(--wmctf-success);
+      box-shadow: 0 12px 48px rgba(52, 199, 89, 0.3);
+    }
+
+    .challenge-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(0, 122, 255, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .challenge-card:hover .challenge-overlay {
+      opacity: 1;
+    }
+
+    .challenge-card.challenge-solved .challenge-overlay {
+      background: linear-gradient(135deg, transparent 0%, rgba(52, 199, 89, 0.1) 100%);
+    }
+
+    .bg-gradient-primary {
+      background: linear-gradient(135deg, var(--wmctf-primary) 0%, var(--wmctf-secondary) 100%);
+      color: white !important;
+    }
+
+    .challenge-action-btn {
+      transition: all 0.2s ease;
+    }
+
+    .challenge-action-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Difficulty Colors */
+    .difficulty-easy {
+      border-left: 4px solid var(--wmctf-success);
+    }
+
+    .difficulty-medium {
+      border-left: 4px solid var(--wmctf-warning);
+    }
+
+    .difficulty-hard {
+      border-left: 4px solid var(--wmctf-accent);
+    }
+
+    /* Custom Loading Spinner */
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .spinner-circle {
+      width: 12px;
+      height: 12px;
+      background: var(--wmctf-primary);
+      border-radius: 50%;
+      animation: spinnerBounce 1.4s ease-in-out both infinite;
+    }
+
+    .spinner-circle:nth-child(1) { animation-delay: -0.32s; }
+    .spinner-circle:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes spinnerBounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    @keyframes bounceGentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Dark mode adjustments */
+    [data-bs-theme="dark"] .card {
+      background: var(--dark-card) !important;
+      border-color: var(--dark-border) !important;
+    }
+
+    [data-bs-theme="dark"] .card-header.bg-light {
+      background: var(--dark-surface) !important;
+      color: var(--dark-text) !important;
+    }
+
+    [data-bs-theme="dark"] .challenge-card {
+      background: var(--dark-card);
+      border-color: var(--dark-border);
+    }
+
+    [data-bs-theme="dark"] .challenge-card:hover {
+      border-color: var(--wmctf-primary);
+    }
+
+    [data-bs-theme="dark"] .challenge-card.challenge-solved {
+      background: linear-gradient(135deg, rgba(52, 199, 89, 0.1) 0%, rgba(52, 199, 89, 0.15) 100%);
+    }
+
+    /* Dark mode badge adjustments */
+    [data-bs-theme="dark"] .badge.bg-light {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.8) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    [data-bs-theme="dark"] .badge.text-muted {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    /* Dark mode glass effect adjustments */
+    [data-bs-theme="dark"] .glass-effect {
+      background: rgba(28, 28, 30, 0.8) !important;
+      border: 1px solid var(--dark-border) !important;
+    }
+
+    [data-bs-theme="dark"] .category-header {
+      background: var(--dark-surface) !important;
+      color: var(--dark-text) !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .challenge-card:hover {
+        transform: translateY(-4px) scale(1.01);
+      }
+      
+      .hero-animation {
+        display: none;
+      }
+    }
+  </style>
+
+  <script>
+    // ActivityFeed Alpine component for notifications and activity
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('ActivityFeed', () => ({
+        activeTab: 'notifications',
+        notifications: [],
+        recentSolves: [],
+        unreadCount: 0,
+        
+        async loadActivityData() {
+          await this.loadNotifications();
+          // Set up auto-refresh every 30 seconds
+          setInterval(() => {
+            this.loadNotifications();
+            if (this.activeTab === 'activity') {
+              this.loadRecentSolves();
+            }
+          }, 30000);
+        },
+        
+        async loadNotifications() {
+          try {
+            const response = await CTFd.fetch('/api/v1/notifications');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success) {
+                this.notifications = data.data;
+                this.unreadCount = this.notifications.filter(n => !n.viewed).length;
+              }
+            }
+          } catch (error) {
+            console.log('Error loading notifications:', error);
+            // Fallback data
+            this.notifications = [
+              {
+                id: 1,
+                title: '{% trans %}Welcome to WMCTF!{% endtrans %}',
+                content: '{% trans %}Good luck in the competition!{% endtrans %}',
+                date: new Date().toISOString(),
+                viewed: false
+              }
+            ];
+          }
+        },
+        
+        async loadRecentSolves() {
+          try {
+            // Get recent solves from all users
+            const response = await CTFd.fetch('/api/v1/submissions?type=correct');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success) {
+                // Transform data for display
+                this.recentSolves = data.data.slice(0, 10).map(solve => ({
+                  id: solve.id,
+                  user: solve.team?.name || solve.user?.name || 'Anonymous',
+                  challenge: solve.challenge?.name || 'Unknown Challenge',
+                  value: solve.challenge?.value || 0,
+                  date: solve.date
+                }));
+              }
+            }
+          } catch (error) {
+            console.log('Error loading recent solves:', error);
+            // Fallback to empty array
+            this.recentSolves = [];
+          }
+        },
+        
+        formatTime(dateStr) {
+          try {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMinutes = Math.floor((now - date) / (1000 * 60));
+            
+            if (diffMinutes < 1) return '{% trans %}Just now{% endtrans %}';
+            if (diffMinutes < 60) return `${diffMinutes}m ago`;
+            if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h ago`;
+            return `${Math.floor(diffMinutes / 1440)}d ago`;
+          } catch (error) {
+            return dateStr;
+          }
+        }
+      }));
+      
+      // UserStats Alpine component for real-time user data
+      Alpine.data('UserStats', () => ({
+        userScore: null,
+        solvedCount: 0,
+        userRank: null,
+        totalChallenges: 0,
+        
+        async loadUserStats() {
+          try {
+            // Get user's current stats
+            const userResponse = await CTFd.fetch('/api/v1/users/me');
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              if (userData.success) {
+                this.userScore = userData.data.score;
+                this.userRank = userData.data.place ? `#${userData.data.place}` : '#-';
+              }
+            }
+            
+            // Get user's solves count
+            const solvesResponse = await CTFd.fetch('/api/v1/users/me/solves');
+            if (solvesResponse.ok) {
+              const solvesData = await solvesResponse.json();
+              if (solvesData.success) {
+                this.solvedCount = solvesData.meta.count;
+              }
+            }
+            
+            // Get total challenges count
+            const challengesResponse = await CTFd.fetch('/api/v1/challenges');
+            if (challengesResponse.ok) {
+              const challengesData = await challengesResponse.json();
+              if (challengesData.success) {
+                this.totalChallenges = challengesData.data.length;
+              }
+            }
+          } catch (error) {
+            console.log('Error loading user stats:', error);
+            // Fallback to template values
+            this.userScore = '{{ User.score }}';
+            this.userRank = '{{ User.place and "#" ~ User.place or "#-" }}';
+          }
+        },
+        
+        // Listen for challenge submission events to update stats
+        init() {
+          this.$watch('$store.challenge.data', (value) => {
+            // Reload stats when a challenge is solved
+            this.loadUserStats();
+          });
+          
+          // Listen for load-challenges event
+          this.$el.addEventListener('load-challenges', () => {
+            this.loadUserStats();
+          });
+        }
+      }));
+    });
+  </script>
+
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/challenges.js") }}
+{% endblock %}

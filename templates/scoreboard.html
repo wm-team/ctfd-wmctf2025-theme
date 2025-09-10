@@ -1,0 +1,722 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <div class="jumbotron">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h1 class="display-4 fw-bold mb-3 slide-up">
+            <i class="fas fa-trophy text-warning me-3"></i>
+            {% trans %}Scoreboard{% endtrans %}
+          </h1>
+          <p class="lead mb-4 slide-up" style="animation-delay: 0.1s;">
+            {% trans %}See how you rank against other competitors and track your progress in real-time.{% endtrans %}
+          </p>
+        </div>
+        <div class="col-lg-4 text-center d-none d-lg-block">
+          <div class="hero-stats slide-up" style="animation-delay: 0.2s;" x-data="TopRankings" x-init="loadTopRankings()">
+            <div class="d-flex justify-content-center gap-3">
+              <div class="stat-item text-center">
+                <div class="stat-number text-primary fw-bold" style="font-size: 2rem;">🥇</div>
+                <div class="stat-label text-muted small">{% trans %}1st Place{% endtrans %}</div>
+                <div class="stat-name fw-bold small text-primary" x-text="topThree[0]?.name || '-'" style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">-</div>
+                <div class="stat-score small text-muted" x-text="topThree[0]?.score ? topThree[0].score + ' pts' : ''"></div>
+              </div>
+              <div class="stat-item text-center">
+                <div class="stat-number text-secondary fw-bold" style="font-size: 2rem;">🥈</div>
+                <div class="stat-label text-muted small">{% trans %}2nd Place{% endtrans %}</div>
+                <div class="stat-name fw-bold small text-secondary" x-text="topThree[1]?.name || '-'" style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">-</div>
+                <div class="stat-score small text-muted" x-text="topThree[1]?.score ? topThree[1].score + ' pts' : ''"></div>
+              </div>
+              <div class="stat-item text-center">
+                <div class="stat-number text-warning fw-bold" style="font-size: 2rem;">🥉</div>
+                <div class="stat-label text-muted small">{% trans %}3rd Place{% endtrans %}</div>
+                <div class="stat-name fw-bold small text-warning" x-text="topThree[2]?.name || '-'" style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">-</div>
+                <div class="stat-score small text-muted" x-text="topThree[2]?.score ? topThree[2].score + ' pts' : ''"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    {% include "components/errors.html" %}
+
+    <!-- Score Graph -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 overflow-hidden slide-up">
+          <div class="card-header bg-light border-0 py-3">
+            <h5 class="card-title mb-0 fw-bold">
+              <i class="fas fa-chart-line text-primary me-2"></i>
+              {% trans %}Score Progression{% endtrans %}
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div id="score-graph" class="align-items-center min-vh-25" :class="{'d-flex': show, 'd-none': !show}" x-data="ScoreboardDetail" x-ref="scoregraph" @bracket-change.window="activeBracket=$event.detail; update();">
+              <div class="col-12 text-center py-5">
+                <div class="spinner-container">
+                  <div class="spinner-circle"></div>
+                  <div class="spinner-circle"></div>
+                  <div class="spinner-circle"></div>
+                </div>
+                <p class="mt-3 text-muted">{% trans %}Loading score graph...{% endtrans %}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div id="scoreboard" x-data="ScoreboardList" class="slide-up" style="animation-delay: 0.3s;">
+      <!-- Bracket Filter -->
+      <template x-if="brackets.length && standings.length">
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                  <h6 class="mb-0 fw-bold text-muted">
+                    <i class="fas fa-filter me-2"></i>
+                    {% trans %}Filter by Category{% endtrans %}
+                  </h6>
+                  <nav class="nav nav-pills">
+                    <button 
+                      :class="{'nav-link': true, 'active': !activeBracket, 'rounded-pill': true, 'px-3': true, 'py-2': true, 'fw-500': true}" 
+                      @click="activeBracket=null"
+                    >
+                      {% trans %}All{% endtrans %}
+                    </button>
+                    <template x-for="bracket in brackets">
+                      <button 
+                        :class="{'nav-link': true, 'active': activeBracket == bracket.id, 'rounded-pill': true, 'px-3': true, 'py-2': true, 'fw-500': true}" 
+                        x-text="bracket.name" 
+                        @click="activeBracket=bracket.id"
+                      ></button>
+                    </template>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- Challenge Completion Matrix -->
+      <div class="row mb-4" x-show="standings.length" x-data="ChallengeMatrix" x-init="loadChallengeData()">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="card-header bg-light border-0 py-3">
+              <h5 class="card-title mb-0 fw-bold">
+                <i class="fas fa-table me-2 text-primary"></i>
+                {% trans %}Challenge Completion Matrix{% endtrans %}
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0 challenge-matrix">
+                  <thead class="table-primary">
+                    <!-- Category Headers Row -->
+                    <tr class="category-row">
+                      <th class="sticky-left bg-primary text-white text-center fw-bold" style="width: 50px;" rowspan="2">
+                        <i class="fas fa-hashtag"></i>
+                      </th>
+                      <th class="sticky-left bg-primary text-white fw-bold" style="width: 120px;" rowspan="2">
+                        <i class="fas fa-user me-1"></i>
+                        {{ get_mode_as_word(capitalize=True) }}
+                      </th>
+                      <th class="bg-primary text-white text-center fw-bold" style="width: 80px;" rowspan="2">
+                        <i class="fas fa-star me-1"></i>
+                        {% trans %}Score{% endtrans %}
+                      </th>
+                      <!-- Category group headers -->
+                      <template x-for="category in Object.keys(challengesByCategory).sort()" :key="category">
+                        <th class="text-center category-header text-white fw-bold" :colspan="challengesByCategory[category].length" :style="getCategoryHeaderStyle(category)">
+                          <span x-text="category.toUpperCase()"></span>
+                        </th>
+                      </template>
+                    </tr>
+                    
+                    <!-- Challenge Headers Row -->
+                    <tr class="challenge-row">
+                      <!-- Challenge columns by category -->
+                      <template x-for="challenge in sortedChallenges" :key="challenge.id">
+                        <th class="text-center challenge-header text-white" style="width: 80px; min-width: 80px;" :style="getCategoryStyle(challenge.category)">
+                          <div class="challenge-name small fw-bold mb-1" x-text="challenge.name" :title="challenge.name"></div>
+                          <div class="challenge-points small" x-text="challenge.value + ' pts'" style="opacity: 0.8;"></div>
+                          <div class="challenge-category small" x-text="challenge.category.toUpperCase()" style="opacity: 0.6; font-size: 0.6rem;"></div>
+                        </th>
+                      </template>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="(standing, index) in standings.filter(i => activeBracket ? i.bracket_id==activeBracket : true).slice(0, 20)" :key="standing.account_id">
+                      <tr class="scoreboard-row" :class="{'top-performer': index < 3}">
+                        <!-- Rank -->
+                        <td class="sticky-left text-center">
+                          <div class="rank-badge-small" :class="{
+                            'rank-1': index === 0,
+                            'rank-2': index === 1,
+                            'rank-3': index === 2
+                          }">
+                            <template x-if="index === 0">
+                              <span class="small">🥇</span>
+                            </template>
+                            <template x-if="index === 1">
+                              <span class="small">🥈</span>
+                            </template>
+                            <template x-if="index === 2">
+                              <span class="small">🥉</span>
+                            </template>
+                            <template x-if="index > 2">
+                              <span class="fw-bold small" x-text="index + 1"></span>
+                            </template>
+                          </div>
+                        </td>
+
+                        <!-- Team Name -->
+                        <td class="sticky-left">
+                          <a :href="standing.account_url" class="text-decoration-none fw-semibold small" x-text="standing.name"></a>
+                        </td>
+
+                        <!-- Score -->
+                        <td class="text-center sticky-left">
+                          <span class="fw-bold small" x-text="standing.score"></span>
+                        </td>
+
+                        <!-- Challenge completion status -->
+                        <template x-for="challenge in sortedChallenges" :key="challenge.id">
+                          <td class="text-center challenge-cell">
+                            <div class="solve-indicator" :class="{
+                              'solved': getSolveStatus(standing, challenge) === 'solved',
+                              'first-blood': getSolveStatus(standing, challenge) === 'first',
+                              'second-blood': getSolveStatus(standing, challenge) === 'second',
+                              'third-blood': getSolveStatus(standing, challenge) === 'third'
+                            }">
+                              <template x-if="getSolveStatus(standing, challenge) === 'first'">
+                                <i class="fas fa-medal" style="color: #FFD700;" title="First Blood"></i>
+                              </template>
+                              <template x-if="getSolveStatus(standing, challenge) === 'second'">
+                                <i class="fas fa-medal" style="color: #C0C0C0;" title="Second Blood"></i>
+                              </template>
+                              <template x-if="getSolveStatus(standing, challenge) === 'third'">
+                                <i class="fas fa-medal" style="color: #CD7F32;" title="Third Blood"></i>
+                              </template>
+                              <template x-if="getSolveStatus(standing, challenge) === 'solved'">
+                                <i class="fas fa-check text-success"></i>
+                              </template>
+                            </div>
+                          </td>
+                        </template>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <!-- Empty State -->
+        <div class="col-12" x-show="!standings.length">
+          <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body text-center py-5">
+              <i class="fas fa-trophy text-muted mb-3" style="font-size: 4rem; opacity: 0.3;"></i>
+              <h4 class="text-muted mb-2">{% trans %}No scores yet{% endtrans %}</h4>
+              <p class="text-muted mb-0">
+                {% trans %}Be the first to solve a challenge and claim the top spot!{% endtrans %}
+              </p>
+              <a href="{{ url_for('challenges.listing') }}" class="btn btn-primary mt-3 rounded-pill px-4">
+                <i class="fas fa-flag me-2"></i>
+                {% trans %}Start Challenges{% endtrans %}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Scoreboard specific styles */
+    .min-vh-25 {
+      min-height: 25vh;
+    }
+
+    .hero-stats {
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(10px);
+    }
+
+    .rank-badge {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      margin: 0 auto;
+    }
+
+    .rank-1 {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    }
+
+    .rank-2 {
+      background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+      box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
+    }
+
+    .rank-3 {
+      background: linear-gradient(135deg, #CD7F32, #B8860B);
+      box-shadow: 0 4px 12px rgba(205, 127, 50, 0.3);
+    }
+
+    .rank-icon {
+      font-size: 1.5rem;
+    }
+
+    .rank-number {
+      color: var(--wmctf-primary);
+      font-size: 1.2rem;
+    }
+
+    .avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      background: var(--light-surface);
+      border: 2px solid var(--light-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--light-muted);
+      transition: all 0.3s ease;
+    }
+
+    .scoreboard-row {
+      transition: all 0.3s ease;
+    }
+
+    .scoreboard-row:hover {
+      background: rgba(0, 122, 255, 0.05);
+      transform: translateX(5px);
+    }
+
+    .top-performer {
+      background: linear-gradient(90deg, rgba(0, 122, 255, 0.05) 0%, transparent 100%);
+    }
+
+    .score-display {
+      padding: 0.5rem;
+    }
+
+    .progress {
+      border-radius: 10px;
+      background: var(--light-surface);
+    }
+
+    .progress-bar {
+      border-radius: 10px;
+      transition: width 0.6s ease;
+    }
+
+    .nav-pills .nav-link {
+      margin: 0 0.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-pills .nav-link:hover {
+      background: rgba(0, 122, 255, 0.1);
+      color: var(--wmctf-primary);
+    }
+
+    .nav-pills .nav-link.active {
+      background: var(--wmctf-primary);
+      color: white;
+    }
+
+    /* Dark mode adjustments */
+    [data-bs-theme="dark"] .hero-stats {
+      background: rgba(28, 28, 30, 0.6);
+    }
+
+    [data-bs-theme="dark"] .avatar-placeholder {
+      background: var(--dark-surface);
+      border-color: var(--dark-border);
+      color: var(--dark-muted);
+    }
+
+    [data-bs-theme="dark"] .scoreboard-row:hover {
+      background: rgba(0, 122, 255, 0.1);
+    }
+
+    [data-bs-theme="dark"] .top-performer {
+      background: linear-gradient(90deg, rgba(0, 122, 255, 0.1) 0%, transparent 100%);
+    }
+
+    [data-bs-theme="dark"] .progress {
+      background: var(--dark-surface);
+    }
+
+    /* Challenge Matrix Styles */
+    .challenge-matrix {
+      font-size: 0.85rem;
+    }
+
+    .challenge-matrix .sticky-left {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      background: white !important;
+    }
+
+    .category-header {
+      padding: 12px 8px !important;
+      font-weight: 700;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .challenge-header {
+      padding: 8px 6px !important;
+      min-height: 60px;
+      vertical-align: middle;
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .challenge-name {
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    .challenge-points {
+      font-size: 0.7rem !important;
+      opacity: 0.9;
+    }
+
+    .challenge-cell {
+      padding: 8px 4px !important;
+      vertical-align: middle;
+      border-left: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .solve-indicator {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin: 0 auto;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+
+    .solve-indicator.solved {
+      background: rgba(52, 199, 89, 0.1);
+      border: 2px solid var(--wmctf-success);
+    }
+
+    .solve-indicator.first-blood {
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid #FFD700;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+      animation: goldPulse 2s ease-in-out infinite;
+    }
+
+    .solve-indicator.second-blood {
+      background: rgba(192, 192, 192, 0.2);
+      border: 2px solid #C0C0C0;
+      box-shadow: 0 0 8px rgba(192, 192, 192, 0.4);
+      animation: silverPulse 2.5s ease-in-out infinite;
+    }
+
+    .solve-indicator.third-blood {
+      background: rgba(205, 127, 50, 0.2);
+      border: 2px solid #CD7F32;
+      box-shadow: 0 0 8px rgba(205, 127, 50, 0.4);
+      animation: bronzePulse 3s ease-in-out infinite;
+    }
+
+    .rank-badge-small {
+      font-size: 0.9rem;
+    }
+
+    @keyframes goldPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes silverPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes bronzePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Dark mode adjustments for all cards and components */
+    [data-bs-theme="dark"] .card {
+      background: var(--dark-card) !important;
+      border-color: var(--dark-border) !important;
+    }
+
+    [data-bs-theme="dark"] .card-header.bg-light {
+      background: var(--dark-surface) !important;
+      color: var(--dark-text) !important;
+    }
+
+    [data-bs-theme="dark"] .card-title {
+      color: var(--dark-text) !important;
+    }
+
+    /* Dark mode adjustments for challenge matrix */
+    [data-bs-theme="dark"] .challenge-matrix {
+      background: var(--dark-card);
+      color: var(--dark-text);
+    }
+
+    [data-bs-theme="dark"] .challenge-matrix .sticky-left {
+      background: var(--dark-card) !important;
+      color: var(--dark-text) !important;
+      border-right: 1px solid var(--dark-border);
+    }
+
+    [data-bs-theme="dark"] .challenge-header {
+      color: white !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-bs-theme="dark"] .category-header {
+      color: white !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-bs-theme="dark"] .challenge-name {
+      color: white !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-bs-theme="dark"] .challenge-points {
+      color: rgba(255, 255, 255, 0.9) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-bs-theme="dark"] .challenge-category {
+      color: rgba(255, 255, 255, 0.7) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-bs-theme="dark"] .solve-indicator.solved {
+      background: rgba(52, 199, 89, 0.2);
+      border-color: #34C759;
+    }
+
+    [data-bs-theme="dark"] .challenge-cell {
+      border-left-color: rgba(255, 255, 255, 0.1);
+      background: var(--dark-card);
+    }
+
+    [data-bs-theme="dark"] .scoreboard-row {
+      background: var(--dark-card);
+    }
+
+    [data-bs-theme="dark"] .scoreboard-row:hover {
+      background: var(--dark-surface);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .rank-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+      }
+
+      .rank-icon {
+        font-size: 1.2rem;
+      }
+
+      .avatar-placeholder {
+        width: 32px;
+        height: 32px;
+      }
+
+      .score-display {
+        padding: 0.25rem;
+      }
+
+      .score-display .fw-bold {
+        font-size: 1.1rem !important;
+      }
+    }
+  </style>
+  <script>
+    // TopRankings Alpine component for real-time top 3 display
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('TopRankings', () => ({
+        topThree: [null, null, null],
+        
+        async loadTopRankings() {
+          try {
+            const response = await CTFd.fetch('/api/v1/scoreboard');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data.length > 0) {
+                // Get top 3 from standings
+                this.topThree = [
+                  data.data[0] || null,
+                  data.data[1] || null, 
+                  data.data[2] || null
+                ];
+              }
+            }
+          } catch (error) {
+            console.log('Error loading top rankings:', error);
+            // Keep default empty state
+            this.topThree = [null, null, null];
+          }
+        },
+        
+        init() {
+          // Auto-refresh every 60 seconds
+          setInterval(() => {
+            this.loadTopRankings();
+          }, 60000);
+        }
+      }));
+      
+      // ChallengeMatrix Alpine component for matrix view
+      Alpine.data('ChallengeMatrix', () => ({
+        challenges: [],
+        challengesByCategory: {},
+        sortedChallenges: [],
+        solveData: {},
+        
+        async loadChallengeData() {
+          try {
+            // Get challenges
+            const challengesResponse = await CTFd.fetch('/api/v1/challenges');
+            if (challengesResponse.ok) {
+              const challengesData = await challengesResponse.json();
+              if (challengesData.success) {
+                this.challenges = challengesData.data;
+                this.organizeChallengesByCategory();
+                this.createSortedChallenges();
+              }
+            }
+            
+            // Get solve data for each challenge
+            await this.loadSolveData();
+          } catch (error) {
+            console.log('Error loading challenge data:', error);
+          }
+        },
+        
+        organizeChallengesByCategory() {
+          const categories = {};
+          this.challenges.forEach(challenge => {
+            if (!categories[challenge.category]) {
+              categories[challenge.category] = [];
+            }
+            categories[challenge.category].push(challenge);
+          });
+          // Sort challenges within each category
+          Object.keys(categories).forEach(category => {
+            categories[category].sort((a, b) => a.value - b.value);
+          });
+          this.challengesByCategory = categories;
+        },
+        
+        createSortedChallenges() {
+          // Create a flat sorted list of challenges grouped by category
+          const sortedCategories = Object.keys(this.challengesByCategory).sort();
+          this.sortedChallenges = [];
+          
+          sortedCategories.forEach(category => {
+            this.challengesByCategory[category].forEach(challenge => {
+              this.sortedChallenges.push(challenge);
+            });
+          });
+        },
+        
+        async loadSolveData() {
+          // Load solve data for each challenge to determine first/second/third blood
+          for (const challenge of this.challenges) {
+            try {
+              const response = await CTFd.fetch(`/api/v1/challenges/${challenge.id}/solves`);
+              if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                  this.solveData[challenge.id] = data.data;
+                }
+              }
+            } catch (error) {
+              console.log(`Error loading solves for challenge ${challenge.id}:`, error);
+            }
+          }
+        },
+        
+        getCategoryHeaderStyle(category) {
+          const colors = {
+            'web': 'background: #007AFF !important;',
+            'crypto': 'background: #5856D6 !important;',
+            'pwn': 'background: #FF3B30 !important;',
+            'reverse': 'background: #34C759 !important;',
+            'forensics': 'background: #FF9500 !important;',
+            'misc': 'background: #8E8E93 !important;'
+          };
+          return colors[category.toLowerCase()] || 'background: #007AFF !important;';
+        },
+        
+        getCategoryStyle(category) {
+          const colors = {
+            'web': 'background: #007AFF !important;',
+            'crypto': 'background: #5856D6 !important;',
+            'pwn': 'background: #FF3B30 !important;',
+            'reverse': 'background: #34C759 !important;',
+            'forensics': 'background: #FF9500 !important;',
+            'misc': 'background: #8E8E93 !important;'
+          };
+          return colors[category.toLowerCase()] || 'background: #007AFF !important;';
+        },
+        
+        getSolveStatus(standing, challenge) {
+          const solves = this.solveData[challenge.id];
+          if (!solves || solves.length === 0) return 'unsolved';
+          
+          // Check if this standing solved the challenge
+          const solve = solves.find(s => s.account_id === standing.account_id);
+          if (!solve) return 'unsolved';
+          
+          // Determine if it's first/second/third blood
+          const solveIndex = solves.findIndex(s => s.account_id === standing.account_id);
+          if (solveIndex === 0) return 'first';
+          if (solveIndex === 1) return 'second';
+          if (solveIndex === 2) return 'third';
+          return 'solved';
+        }
+      }));
+    });
+  </script>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/scoreboard.js") }}
+{% endblock %}
