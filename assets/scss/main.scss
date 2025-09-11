@@ -841,7 +841,131 @@ blockquote {
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
 }
 
-// Responsive design improvements
+// 4K and Ultra-wide screen optimizations
+@media (min-width: 2560px) {
+  html {
+    font-size: 18px; // Increase base font size for better readability
+  }
+  
+  .container {
+    max-width: 1800px; // Larger max width for 4K screens
+  }
+  
+  .container-fluid {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+  
+  .navbar {
+    padding: 1rem 0;
+    min-height: 80px !important;
+  }
+  
+  .navbar-brand {
+    font-size: 1.5rem;
+    
+    .ctf_logo {
+      height: 40px !important;
+      max-height: 40px !important;
+    }
+  }
+  
+  .nav-link {
+    padding: 0.75rem 1rem !important;
+    font-size: 1.1rem !important;
+  }
+  
+  .jumbotron {
+    padding: 6rem 0;
+    
+    h1 {
+      font-size: 4rem;
+    }
+    
+    .lead {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .card {
+    border-radius: 2rem;
+    
+    .card-header {
+      padding: 2rem;
+    }
+    
+    .card-body {
+      padding: 2rem;
+    }
+  }
+  
+  .btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 2rem;
+  }
+  
+  .badge {
+    font-size: 1rem;
+    padding: 0.5em 1em;
+  }
+  
+  .challenge-card {
+    min-height: 180px;
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+  
+  .category-filter-btn {
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .user-sidebar .card {
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+  
+  body {
+    padding-top: 90px; // Adjust for larger navbar
+  }
+}
+
+// Large desktop screens (1440p-2K)
+@media (min-width: 1920px) and (max-width: 2559px) {
+  html {
+    font-size: 16px;
+  }
+  
+  .container {
+    max-width: 1400px;
+  }
+  
+  .container-fluid {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  
+  .jumbotron {
+    padding: 4rem 0;
+  }
+  
+  .challenge-card {
+    min-height: 150px;
+  }
+}
+
+// Standard desktop responsive design
+@media (max-width: 1199px) {
+  .container-fluid {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 @media (max-width: 768px) {
   .jumbotron {
     padding: 2rem 0;
