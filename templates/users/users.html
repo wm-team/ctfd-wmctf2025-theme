@@ -43,7 +43,7 @@
           <thead>
           <tr>
             <th>{% trans %}User{% endtrans %}</th>
-            <th>{% trans %}Website{% endtrans %}</th>
+            <th class="text-center" style="width: 80px;">{% trans %}Website{% endtrans %}</th>
             <th class="d-none d-md-table-cell">{% trans %}Affiliation{% endtrans %}</th>
             <th class="d-none d-md-table-cell">{% trans %}Country{% endtrans %}</th>
           </tr>
@@ -71,7 +71,7 @@
                 {% endif %}
               </td>
 
-              <td class="text-center" style="width: 10px;">
+              <td class="text-center">
                 {% if user.website and (user.website.startswith('http://') or user.website.startswith('https://')) %}
                   <a href="{{ user.website }}" target="_blank" rel="noopener">
                     <i

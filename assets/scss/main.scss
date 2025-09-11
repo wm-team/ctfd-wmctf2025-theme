@@ -716,15 +716,24 @@ blockquote {
     border-bottom: 2px solid var(--light-border);
     font-weight: 600;
     color: var(--light-text);
+    white-space: nowrap; // 防止表头文字换行
+    padding: 0.75rem; // 确保有足够的内边距
   }
   
   td {
     border-bottom: 1px solid var(--light-border);
     vertical-align: middle;
+    padding: 0.75rem; // 确保有足够的内边距
   }
   
   tr:hover {
     background: rgba(0, 122, 255, 0.05);
+  }
+  
+  // 修复窄列的显示问题
+  th[style*="width: 10px"], td[style*="width: 10px"] {
+    width: auto !important;
+    min-width: 60px !important;
   }
 }
 

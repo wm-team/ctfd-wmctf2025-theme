@@ -45,7 +45,7 @@
           <thead>
           <tr>
             <th class="text-md-start">{% trans %}Team{% endtrans %}</th>
-            <th>{% trans %}Website{% endtrans %}</th>
+            <th class="text-center" style="width: 80px;">{% trans %}Website{% endtrans %}</th>
             <th class="d-none d-md-table-cell">{% trans %}Affiliation{% endtrans %}</th>
             <th class="d-none d-md-table-cell">{% trans %}Country{% endtrans %}</th>
           </tr>
@@ -72,7 +72,7 @@
                 {% endif %}
               </td>
 
-              <td style="width: 10px;">
+              <td class="text-center">
                 {% if team.website and (team.website.startswith('http://') or team.website.startswith('https://')) %}
                   <a href="{{ team.website }}" target="_blank" rel="noopener">
                     <i
