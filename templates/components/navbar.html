@@ -20,7 +20,7 @@
       <i class="fas fa-bars text-primary"></i>
     </button>
 
-    <div class="collapse navbar-collapse" id="base-navbars">
+    <div class="navbar-collapse" id="base-navbars" data-bs-collapse="true">
       <ul class="navbar-nav me-auto">
         {% for page in Plugins.user_menu_pages %}
           <li class="nav-item">
@@ -177,3 +177,19 @@
     </div>
   </div>
 </nav>
+
+<script>
+// 检测Firefox浏览器并修改navbar-collapse的CSS类
+(function() {
+  const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+  const navbarCollapse = document.getElementById('base-navbars');
+  
+  if (isFirefox) {
+    // 如果是Firefox浏览器，移除collapse类，只保留navbar-collapse
+    navbarCollapse.classList.remove('collapse');
+  } else {
+    // 如果不是Firefox浏览器，添加collapse类
+    navbarCollapse.classList.add('collapse');
+  }
+})();
+</script>
