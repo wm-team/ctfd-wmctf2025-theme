@@ -1,83 +1,211 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="jumbotron">
+  <div class="min-vh-100 d-flex align-items-center py-5">
     <div class="container">
-      <h1>
-        {% trans %}Register{% endtrans %}
-      </h1>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        {% include "components/errors.html" %}
-
-        {% if integrations.mlc() %}
-          <a class="btn btn-secondary btn-lg btn-block w-100" href="{{ url_for('auth.oauth_login') }}">
-            Login with Major League Cyber
-          </a>
-
-          <hr>
-        {% endif %}
-
-        {% with form = Forms.auth.RegistrationForm() %}
-
-          {% from "macros/forms.html" import render_extra_fields %}
-
-          <form method="post" accept-charset="utf-8" role="form">
-
-            <div class="mb-3">
-              <b>{{ form.name.label(class="form-label") }}</b>
-              {{ form.name(class="form-control", value=name, autocomplete="username") }}
-              <small class="form-text text-muted">
-                {% trans %}Your username on the site{% endtrans %}
-              </small>
-            </div>
-
-            <div class="mb-3">
-              <b>{{ form.email.label(class="form-label") }}</b>
-              {{ form.email(class="form-control", value=email, autocomplete="email") }}
-              <small class="form-text text-muted">
-                {% trans %}Never shown to the public{% endtrans %}
-              </small>
-            </div>
-
-            <div class="mb-3">
-              <b>{{ form.password.label(class="form-label") }}</b>
-              {{ form.password(class="form-control", value=password, autocomplete="new-password") }}
-              <small class="form-text text-muted">
-                {% trans %}Password used to log into your account{% endtrans %}
-              </small>
-            </div>
-
-            {{ form.nonce() }}
-
-            {{ render_extra_fields(form.extra) }}
-
-            <div class="row pt-3">
-              <div class="col-6 col-md-4 offset-6 offset-md-8">
-                {{ form.submit(class="btn btn-block btn-primary w-100") }}
+      <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+          <!-- Register Card -->
+          <div class="card border-0 shadow-lg rounded-4 overflow-hidden slide-up">
+            <!-- Card Header with Gradient -->
+            <div class="card-header text-center py-4 register-header">
+              <div class="mb-3">
+                {% if Configs.ctf_logo %}
+                  <img src="{{ url_for('views.files', path=Configs.ctf_logo) }}" alt="{{ Configs.ctf_name }}" height="32" class="mb-2 d-block mx-auto" style="max-height: 32px; width: auto; max-width: 100px; object-fit: contain;">
+                {% else %}
+                  <h3 class="text-white mb-2">{{ Configs.ctf_name }}</h3>
+                {% endif %}
               </div>
+              <h2 class="text-white fw-bold mb-1">{% trans %}Join WMCTF{% endtrans %}</h2>
+              <p class="text-white-50 mb-0">{% trans %}Create your account and start competing{% endtrans %}</p>
             </div>
 
-            {% if Configs.tos_or_privacy %}
-              <div class="row pt-3">
-                <div class="col-md-12 text-center">
-                  <small class="text-muted text-center">
-                    {% trans trimmed privacy_link=Configs.privacy_link, tos_link=Configs.tos_link %}
-                    By registering, you agree to the
-                    <a href="{{ privacy_link }}" target="_blank">privacy policy</a>
-                    and <a href="{{ tos_link }}" target="_blank">terms of service</a>
-                    {% endtrans %}
-                  </small>
+            <!-- Card Body -->
+            <div class="card-body p-4 p-md-5">
+              {% include "components/errors.html" %}
+
+              {% if integrations.mlc() %}
+                <a class="btn btn-outline-secondary btn-lg w-100 mb-4 rounded-pill d-flex align-items-center justify-content-center" href="{{ url_for('auth.oauth_login') }}">
+                  <i class="fas fa-shield-alt me-2"></i>
+                  Register with Major League Cyber
+                </a>
+
+                <div class="text-center mb-4">
+                  <span class="text-muted">{% trans %}or{% endtrans %}</span>
                 </div>
+              {% endif %}
+
+              {% with form = Forms.auth.RegistrationForm() %}
+                {% from "macros/forms.html" import render_extra_fields %}
+
+                <form method="post" accept-charset="utf-8" class="fade-in" style="animation-delay: 0.2s;">
+                  <!-- Username Field -->
+                  <div class="mb-4">
+                    <label class="form-label fw-semibold text-dark mb-2">
+                      <i class="fas fa-user me-2 text-primary"></i>
+                      {{ form.name.label.text }}
+                    </label>
+                    <div class="position-relative">
+                      {{ form.name(class="form-control form-control-lg rounded-pill ps-4", value=name, autocomplete="username", placeholder="Choose your username") }}
+                    </div>
+                    <small class="form-text text-muted">
+                      {% trans %}Your username on the site{% endtrans %}
+                    </small>
+                  </div>
+
+                  <!-- Email Field -->
+                  <div class="mb-4">
+                    <label class="form-label fw-semibold text-dark mb-2">
+                      <i class="fas fa-envelope me-2 text-primary"></i>
+                      {{ form.email.label.text }}
+                    </label>
+                    <div class="position-relative">
+                      {{ form.email(class="form-control form-control-lg rounded-pill ps-4", value=email, autocomplete="email", placeholder="Enter your email address") }}
+                    </div>
+                    <small class="form-text text-muted">
+                      {% trans %}Never shown to the public{% endtrans %}
+                    </small>
+                  </div>
+
+                  <!-- Password Field -->
+                  <div class="mb-4">
+                    <label class="form-label fw-semibold text-dark mb-2">
+                      <i class="fas fa-lock me-2 text-primary"></i>
+                      {{ form.password.label.text }}
+                    </label>
+                    <div class="position-relative">
+                      {{ form.password(class="form-control form-control-lg rounded-pill ps-4", value=password, autocomplete="new-password", placeholder="Create a secure password") }}
+                    </div>
+                    <small class="form-text text-muted">
+                      {% trans %}Password used to log into your account{% endtrans %}
+                    </small>
+                  </div>
+
+                  {{ form.nonce() }}
+                  {{ render_extra_fields(form.extra) }}
+
+                  <!-- Register Button -->
+                  <div class="mb-4">
+                    {{ form.submit(class="btn btn-primary btn-lg w-100 rounded-pill fw-semibold py-3", value="Create Account") }}
+                  </div>
+
+                  {% if Configs.tos_or_privacy %}
+                    <div class="text-center mb-3">
+                      <small class="text-muted">
+                        {% trans trimmed privacy_link=Configs.privacy_link, tos_link=Configs.tos_link %}
+                        By registering, you agree to the
+                        <a href="{{ privacy_link }}" target="_blank" class="text-decoration-none">privacy policy</a>
+                        and <a href="{{ tos_link }}" target="_blank" class="text-decoration-none">terms of service</a>
+                        {% endtrans %}
+                      </small>
+                    </div>
+                  {% endif %}
+                </form>
+              {% endwith %}
+
+              <!-- Login Link -->
+              <div class="text-center">
+                <p class="text-muted mb-0">
+                  {% trans %}Already have an account?{% endtrans %}
+                  <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-semibold">
+                    {% trans %}Sign in here{% endtrans %}
+                  </a>
+                </p>
               </div>
-            {% endif %}
-          </form>
-        {% endwith %}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <style>
+    /* Register page specific styles */
+    .min-vh-100 {
+      background: linear-gradient(135deg, 
+        rgba(0, 122, 255, 0.05) 0%, 
+        rgba(88, 86, 214, 0.08) 50%, 
+        rgba(255, 59, 48, 0.05) 100%
+      );
+      background-image: url("/themes/core/static/img/wmctf-hero-bg.svg");
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .min-vh-100::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      z-index: 0;
+    }
+
+    [data-bs-theme="dark"] .min-vh-100::before {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .register-header {
+      background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%) !important;
+      color: white !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-control-lg {
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      border: 2px solid var(--light-border);
+      transition: all 0.3s ease;
+    }
+
+    .form-control-lg:focus {
+      border-color: var(--wmctf-primary);
+      box-shadow: 0 0 0 0.2rem rgba(0, 122, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    /* Dark mode adjustments */
+    [data-bs-theme="dark"] .card {
+      background: rgba(28, 28, 30, 0.95);
+      border: 1px solid var(--dark-border);
+    }
+
+    [data-bs-theme="dark"] .form-control-lg {
+      background: var(--dark-surface);
+      border-color: var(--dark-border);
+      color: var(--dark-text);
+    }
+
+    [data-bs-theme="dark"] .form-control-lg:focus {
+      background: var(--dark-card);
+    }
+
+    [data-bs-theme="dark"] .form-label {
+      color: var(--dark-text) !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .min-vh-100 {
+        padding: 2rem 0;
+      }
+      
+      .card-body {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
 {% endblock %}

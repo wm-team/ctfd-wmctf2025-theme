@@ -8,10 +8,10 @@
           <!-- Login Card -->
           <div class="card border-0 shadow-lg rounded-4 overflow-hidden slide-up">
             <!-- Card Header with Gradient -->
-            <div class="card-header bg-gradient text-center py-4" style="background: linear-gradient(135deg, var(--wmctf-primary) 0%, var(--wmctf-secondary) 100%);">
+            <div class="card-header text-center py-4 login-header">
               <div class="mb-3">
                 {% if Configs.ctf_logo %}
-                  <img src="{{ url_for('views.files', path=Configs.ctf_logo) }}" alt="{{ Configs.ctf_name }}" height="48" class="mb-2">
+                  <img src="{{ url_for('views.files', path=Configs.ctf_logo) }}" alt="{{ Configs.ctf_name }}" height="32" class="mb-2 d-block mx-auto" style="max-height: 32px; width: auto; max-width: 100px; object-fit: contain;">
                 {% else %}
                   <h3 class="text-white mb-2">{{ Configs.ctf_name }}</h3>
                 {% endif %}
@@ -62,8 +62,8 @@
                   <!-- Remember & Forgot Password -->
                   <div class="d-flex justify-content-between align-items-center mb-4">
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="rememberMe">
-                      <label class="form-check-label text-muted" for="rememberMe">
+                      <input class="form-check-input custom-checkbox" type="checkbox" id="rememberMe">
+                      <label class="form-check-label" for="rememberMe">
                         {% trans %}Remember me{% endtrans %}
                       </label>
                     </div>
@@ -95,29 +95,6 @@
             </div>
           </div>
 
-          <!-- Additional Info -->
-          <div class="text-center mt-4 slide-up" style="animation-delay: 0.4s;">
-            <div class="row g-3">
-              <div class="col-4">
-                <div class="text-center">
-                  <i class="fas fa-shield-alt text-primary mb-2" style="font-size: 1.5rem;"></i>
-                  <p class="small text-muted mb-0">{% trans %}Secure{% endtrans %}</p>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="text-center">
-                  <i class="fas fa-bolt text-warning mb-2" style="font-size: 1.5rem;"></i>
-                  <p class="small text-muted mb-0">{% trans %}Fast{% endtrans %}</p>
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="text-center">
-                  <i class="fas fa-trophy text-success mb-2" style="font-size: 1.5rem;"></i>
-                  <p class="small text-muted mb-0">{% trans %}Competitive{% endtrans %}</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -162,6 +139,69 @@
       -webkit-backdrop-filter: blur(20px);
     }
 
+    .login-header {
+      background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%) !important;
+      color: white !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Custom Checkbox Styles */
+    .custom-checkbox {
+      width: 16px !important;
+      height: 16px !important;
+      border: 1.5px solid #C6C6C8 !important;
+      border-radius: 30px !important;
+      background: white !important;
+      transition: all 0.2s ease !important;
+      cursor: pointer !important;
+      margin-right: 8px !important;
+      position: relative !important;
+    }
+
+    .custom-checkbox:checked {
+      background: #007AFF !important;
+      border-color: #007AFF !important;
+      box-shadow: none !important;
+    }
+
+    .custom-checkbox:checked::before {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .custom-checkbox:focus {
+      box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2) !important;
+      outline: none !important;
+    }
+
+    .custom-checkbox:hover {
+      border-color: #007AFF !important;
+    }
+
+    .form-check {
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .form-check-label {
+      color: #6D6D70 !important;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+      cursor: pointer !important;
+      margin-bottom: 0 !important;
+      line-height: 1.2 !important;
+    }
+
+    .form-check-label:hover {
+      color: #007AFF !important;
+    }
+
     .form-control-lg {
       padding: 1rem 1.5rem;
       font-size: 1rem;
@@ -204,6 +244,36 @@
 
     [data-bs-theme="dark"] .form-control-lg:focus {
       background: var(--dark-card);
+    }
+
+    [data-bs-theme="dark"] .form-control-lg::placeholder {
+      color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    [data-bs-theme="dark"] .form-label {
+      color: var(--dark-text) !important;
+    }
+
+    [data-bs-theme="dark"] .custom-checkbox {
+      background: #2C2C2E !important;
+      border-color: #48484A !important;
+    }
+
+    [data-bs-theme="dark"] .custom-checkbox:checked {
+      background: #007AFF !important;
+      border-color: #007AFF !important;
+    }
+
+    [data-bs-theme="dark"] .custom-checkbox:hover {
+      border-color: #007AFF !important;
+    }
+
+    [data-bs-theme="dark"] .form-check-label {
+      color: #EBEBF5 !important;
+    }
+
+    [data-bs-theme="dark"] .form-check-label:hover {
+      color: #007AFF !important;
     }
 
     /* Responsive adjustments */

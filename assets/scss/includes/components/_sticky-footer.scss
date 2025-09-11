@@ -7,14 +7,14 @@ html {
 
 main {
   /* Margin bottom by footer height */
-  margin-bottom: 100px;
+  margin-bottom: 60px;
 }
 
 .footer {
   position: absolute;
 
-  /* prevent scrollbars from showing on pages that don't use the full page height */
-  bottom: 1px;
+  /* Stick to the very bottom */
+  bottom: 0;
 
   width: 100%;
 
@@ -22,10 +22,14 @@ main {
   height: 60px;
 
   /* Vertically center the text there */
-  line-height: 60px;
+  line-height: normal;
 
-  /* Avoid covering things */
-  z-index: -20;
+  /* Ensure footer is visible above other content */
+  z-index: 10;
+
+  /* Center content vertically */
+  display: flex;
+  align-items: center;
 
   /*background-color: #f5f5f5;*/
 }
