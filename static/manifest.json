@@ -15,6 +15,10 @@
     "file": "assets/raleway-cyrillic-ext-400-normal.1a60d844.woff2",
     "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-ext-400-normal.woff2"
   },
+  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-400-normal.woff2": {
+    "file": "assets/raleway-cyrillic-400-normal.679eb908.woff2",
+    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-400-normal.woff2"
+  },
   "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-700-normal.woff2": {
     "file": "assets/lato-latin-700-normal.c447dd76.woff2",
     "src": "node_modules/.pnpm/@fontsource+lato@4.5.10/node_modules/@fontsource/lato/files/lato-latin-700-normal.woff2"
@@ -22,10 +26,6 @@
   "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-vietnamese-400-normal.woff2": {
     "file": "assets/raleway-vietnamese-400-normal.917d91f1.woff2",
     "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-vietnamese-400-normal.woff2"
-  },
-  "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-400-normal.woff2": {
-    "file": "assets/raleway-cyrillic-400-normal.679eb908.woff2",
-    "src": "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-cyrillic-400-normal.woff2"
   },
   "node_modules/.pnpm/@fontsource+raleway@4.5.12/node_modules/@fontsource/raleway/files/raleway-latin-ext-400-normal.woff2": {
     "file": "assets/raleway-latin-ext-400-normal.293dc7f5.woff2",
