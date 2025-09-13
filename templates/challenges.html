@@ -99,6 +99,21 @@
              };
              const key = category.toLowerCase();
              return classes[key] || 'bg-info-subtle text-info';
+           },
+           
+           getDifficultyFromName(challengeName) {
+             if (!challengeName) return 'medium';
+             const name = challengeName.toUpperCase();
+             if (name.startsWith('[EASY]')) return 'easy';
+             if (name.startsWith('[MEDIUM]')) return 'medium';
+             if (name.startsWith('[HARD]')) return 'hard';
+             return 'medium'; // 默认中等难度
+           },
+           
+           getCleanChallengeName(challengeName) {
+             if (!challengeName) return '';
+             // 移除前缀标签 [EASY], [MEDIUM], [HARD]
+             return challengeName.replace(/^\[(EASY|MEDIUM|HARD)\]\s*/i, '').trim();
            }
          }" 
          @load-challenges.window="loadChallenges()" 
@@ -198,7 +213,7 @@
                         class="challenge-card h-100 position-relative"
                         :class="[
                           c.solved_by_me ? 'challenge-solved' : '',
-                          'difficulty-' + (c.value <= 100 ? 'easy' : c.value <= 300 ? 'medium' : 'hard'),
+                          'difficulty-' + getDifficultyFromName(c.name),
                           'category-' + category.toLowerCase().replace(/[^a-z0-9]/g, '-'),
                           ...c.tags.map((tag) => `tag-${tag.value.replace(/ /g, '-')}`),
                         ]"
@@ -212,7 +227,7 @@
                         <!-- Card Content -->
                         <div class="card-body p-3 h-100 d-flex flex-column">
                           <!-- Challenge Name -->
-                          <h6 class="card-title fw-bold mb-2 text-truncate" x-text="c.name"></h6>
+                          <h6 class="card-title fw-bold mb-2 text-truncate" x-text="getCleanChallengeName(c.name)"></h6>
                           
                           <!-- Points and Solve Count -->
                           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -230,19 +245,19 @@
                           <div class="d-flex justify-content-between align-items-center mb-2">
                             <!-- Difficulty Indicator -->
                             <div class="difficulty-indicator">
-                              <template x-if="c.value <= 100">
+                              <template x-if="getDifficultyFromName(c.name) === 'easy'">
                                 <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill small">
                                   <i class="fas fa-seedling me-1"></i>
                                   {% trans %}Easy{% endtrans %}
                                 </span>
                               </template>
-                              <template x-if="c.value > 100 && c.value <= 300">
+                              <template x-if="getDifficultyFromName(c.name) === 'medium'">
                                 <span class="badge bg-warning-subtle text-warning px-2 py-1 rounded-pill small">
                                   <i class="fas fa-fire me-1"></i>
                                   {% trans %}Medium{% endtrans %}
                                 </span>
                               </template>
-                              <template x-if="c.value > 300">
+                              <template x-if="getDifficultyFromName(c.name) === 'hard'">
                                 <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill small">
                                   <i class="fas fa-skull me-1"></i>
                                   {% trans %}Hard{% endtrans %}
