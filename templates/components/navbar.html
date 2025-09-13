@@ -79,7 +79,7 @@
               <i class="fas fa-user-circle me-1"></i>
               <span class="d-none d-md-inline">{{ User.name }}</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="userDropdown" style="min-width: 200px;">
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="userDropdown" style="min-width: 200px; overflow: hidden;">
               <li>
                 <a class="dropdown-item d-flex align-items-center py-2" href="{{ url_for('users.private') }}">
                   <i class="fas fa-user me-2 text-primary"></i>

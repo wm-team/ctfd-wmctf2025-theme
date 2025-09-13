@@ -344,7 +344,7 @@
                 <button 
                   class="nav-link rounded-pill fw-500 px-3 py-2" 
                   :class="activeTab === 'notifications' ? 'active' : ''"
-                  @click="activeTab = 'notifications'"
+                  @click="activeTab = 'notifications'; markAllNotificationsAsRead()"
                   type="button"
                 >
                   <i class="fas fa-bell me-1"></i>
@@ -373,7 +373,7 @@
                 
                 <div x-show="notifications.length > 0">
                   <template x-for="notification in notifications.slice(0, 3)" :key="notification.id">
-                    <div class="notification-item d-flex align-items-start mb-3 pb-2 border-bottom">
+                    <div class="notification-item d-flex align-items-start mb-3 pb-2 border-bottom" @click="markAllNotificationsAsRead()" style="cursor: pointer;">
                       <div class="notification-icon me-2 mt-1">
                         <i class="fas fa-info-circle text-info"></i>
                       </div>
@@ -386,7 +386,7 @@
                   </template>
                   
                   <div class="text-center mt-3">
-                    <a href="{{ url_for('views.notifications') }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                    <a href="{{ url_for('views.notifications') }}" class="btn btn-outline-primary btn-sm rounded-pill" @click="markAllNotificationsAsRead()">
                       <i class="fas fa-bell me-1"></i>
                       {% trans %}View All{% endtrans %}
                     </a>
@@ -745,6 +745,10 @@
         
         async loadActivityData() {
           await this.loadNotifications();
+          
+          // 初始化CTFd通知系统
+          this.initCTFdNotificationSystem();
+          
           // Set up auto-refresh every 30 seconds
           setInterval(() => {
             this.loadNotifications();
@@ -754,14 +758,38 @@
           }, 30000);
         },
         
+        // 初始化CTFd通知系统
+        initCTFdNotificationSystem() {
+          try {
+            // 监听CTFd通知计数器的变化
+            if (typeof CTFd !== 'undefined' && CTFd.events && CTFd.events.controller) {
+              CTFd.events.controller.on('counter', (data) => {
+                this.unreadCount = data.count;
+                Alpine.store("unread_count", this.unreadCount);
+              });
+            }
+            
+            // 初始化未读计数
+            if (typeof CTFd !== 'undefined' && CTFd.events && CTFd.events.counter) {
+              this.unreadCount = CTFd.events.counter.unread.getAll().length;
+              Alpine.store("unread_count", this.unreadCount);
+            }
+          } catch (error) {
+            console.log('Error initializing CTFd notification system:', error);
+          }
+        },
+        
         async loadNotifications() {
           try {
+            // 获取所有通知（不限制since_id）
             const response = await CTFd.fetch('/api/v1/notifications');
             if (response.ok) {
               const data = await response.json();
               if (data.success) {
-                this.notifications = data.data;
-                this.unreadCount = this.notifications.filter(n => !n.viewed).length;
+                // 按日期倒序排列，最新的在最上面
+                this.notifications = data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+                // 使用CTFd的通知计数器来获取未读数量
+                this.unreadCount = CTFd.events.counter.unread.getAll().length;
               }
             }
           } catch (error) {
@@ -776,6 +804,7 @@
                 viewed: false
               }
             ];
+            this.unreadCount = 0;
           }
         },
         
@@ -815,6 +844,29 @@
             return `${Math.floor(diffMinutes / 1440)}d ago`;
           } catch (error) {
             return dateStr;
+          }
+        },
+        
+        // 标记所有通知为已读
+        markAllNotificationsAsRead() {
+          try {
+            // 获取所有未读通知的ID
+            const unreadIds = CTFd.events.counter.unread.getAll();
+            
+            // 将未读通知标记为已读
+            unreadIds.forEach(notificationId => {
+              CTFd._functions.events.eventRead(notificationId);
+            });
+            
+            // 更新未读计数
+            this.unreadCount = CTFd.events.counter.unread.getAll().length;
+            
+            // 更新Alpine store
+            Alpine.store("unread_count", this.unreadCount);
+            
+            console.log('All notifications marked as read');
+          } catch (error) {
+            console.log('Error marking notifications as read:', error);
           }
         }
       }));
