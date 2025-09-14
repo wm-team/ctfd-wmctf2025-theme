@@ -114,13 +114,36 @@
              if (!challengeName) return '';
              // 移除前缀标签 [EASY], [MEDIUM], [HARD]
              return challengeName.replace(/^\[(EASY|MEDIUM|HARD)\]\s*/i, '').trim();
+           },
+           
+           getDifficultyWeight(challengeName) {
+             if (!challengeName) return 2; // 默认中等难度权重
+             const name = challengeName.toUpperCase();
+             if (name.startsWith('[EASY]')) return 1;    // EASY = 1 (最高优先级)
+             if (name.startsWith('[MEDIUM]')) return 2;  // MEDIUM = 2
+             if (name.startsWith('[HARD]')) return 3;     // HARD = 3 (最低优先级)
+             return 2; // 默认中等难度权重
+           },
+           
+           getSortedChallenges(category) {
+             const challenges = this.getChallenges(category);
+             return challenges.sort((a, b) => {
+               // 首先按难度排序 (EASY -> MEDIUM -> HARD)
+               const difficultyA = this.getDifficultyWeight(a.name);
+               const difficultyB = this.getDifficultyWeight(b.name);
+               if (difficultyA !== difficultyB) {
+                 return difficultyA - difficultyB;
+               }
+               // 如果难度相同，按分数排序 (低分到高分)
+               return a.value - b.value;
+             });
            }
          }" 
          @load-challenges.window="loadChallenges()" 
          @load-challenge.window="loadChallenge($event.detail)">
       
       <!-- Challenge Modal -->
-      <div x-ref="challengeWindow" id="challenge-window" class="modal fade" tabindex="-1" role="dialog" x-data="" x-html="$store.challenge.data.view"></div>
+      <div x-ref="challengeWindow" id="challenge-window" class="modal fade challenge-modal-container" tabindex="-1" role="dialog" x-data="" x-html="$store.challenge.data.view"></div>
 
       <!-- Left Sidebar - Category Filter -->
       <div class="col-lg-2 col-md-3">
@@ -154,7 +177,7 @@
                   >
                     <i class="me-2" :class="getCategoryIcon(category) + ' ' + getCategoryColor(category)"></i>
                     <span x-text="category"></span>
-                    <span class="badge ms-auto" :class="getCategoryBadgeClass(category)" x-text="getChallenges(category).length"></span>
+                    <span class="badge ms-auto" :class="getCategoryBadgeClass(category)" x-text="getSortedChallenges(category).length"></span>
                   </button>
                 </template>
               </div>
@@ -198,8 +221,8 @@
                     <div>
                       <h4 class="mb-1 fw-bold" x-text="category"></h4>
                       <small class="text-muted">
-                        <span x-text="getChallenges(category).length"></span> {% trans %}challenges{% endtrans %}
-                        · <span x-text="getChallenges(category).filter(c => c.solved_by_me).length"></span> {% trans %}solved{% endtrans %}
+                        <span x-text="getSortedChallenges(category).length"></span> {% trans %}challenges{% endtrans %}
+                        · <span x-text="getSortedChallenges(category).filter(c => c.solved_by_me).length"></span> {% trans %}solved{% endtrans %}
                       </small>
                     </div>
                   </div>
@@ -207,7 +230,7 @@
 
                 <!-- Challenge Cards -->
                 <div class="row g-3">
-                  <template x-for="(c, challengeIdx) in getChallenges(category)" :key="c.id">
+                  <template x-for="(c, challengeIdx) in getSortedChallenges(category)" :key="c.id">
                     <div class="col-sm-6 col-xl-4">
                       <div 
                         class="challenge-card h-100 position-relative"
@@ -735,6 +758,35 @@
     [data-bs-theme="dark"] .category-header {
       background: var(--dark-surface) !important;
       color: var(--dark-text) !important;
+    }
+
+    /* 修复题目模态框顶部蓝线问题 - 针对模态框容器 */
+    .challenge-modal-container {
+      outline: none !important;
+    }
+    
+    .challenge-modal-container:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    .challenge-modal-container:focus-visible {
+      outline: none !important;
+    }
+    
+    /* 确保模态框内容区域也没有焦点样式 */
+    .challenge-modal-container .modal-dialog {
+      outline: none !important;
+    }
+    
+    .challenge-modal-container .modal-content {
+      outline: none !important;
+      border: none !important;
+    }
+    
+    .challenge-modal-container .modal-content:focus {
+      outline: none !important;
+      box-shadow: none !important;
     }
 
     /* Responsive adjustments */

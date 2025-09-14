@@ -648,20 +648,167 @@ blockquote {
   }
 }
 
-// Enhanced footer
+// Enhanced footer with Apple Design
 .footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 60px;
+  height: 60px; // 紧凑高度
   background: var(--light-surface);
   border-top: 1px solid var(--light-border);
-  display: flex;
-  align-items: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   z-index: 10;
   
-  .text-secondary {
-    color: var(--light-muted) !important;
+  .container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  
+  .footer-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+  
+  .footer-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  
+  .footer-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  
+  .footer-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--light-border);
+    opacity: 0.6;
+  }
+  
+  .footer-link {
+    color: var(--light-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    
+    &:hover {
+      color: var(--wmctf-primary);
+      transform: translateY(-1px);
+    }
+  }
+  
+  .footer-text {
+    font-size: 0.875rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  
+  .developer-attribution {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .attribution-text {
+    font-size: 0.875rem;
+    color: var(--light-muted);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  
+  .developer-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--light-text);
+    text-decoration: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    font-weight: 500;
+    
+    &:hover {
+      background: rgba(0, 122, 255, 0.1);
+      color: var(--wmctf-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  
+  .github-icon {
+    width: 16px;
+    height: 16px;
+    transition: all 0.2s ease;
+  }
+  
+  .developer-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  
+  // 移动端响应式设计
+  @media (max-width: 768px) {
+    height: 80px;
+    
+    .footer-content {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    
+    .footer-left,
+    .footer-right {
+      flex: none;
+      justify-content: center;
+    }
+    
+    .footer-divider {
+      width: 40px;
+      height: 1px;
+    }
+    
+    .developer-attribution {
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+    
+    .developer-link {
+      padding: 0.3rem 0.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    height: 70px;
+    
+    .footer-text,
+    .attribution-text,
+    .developer-name {
+      font-size: 0.75rem;
+    }
+    
+    .github-icon {
+      width: 14px;
+      height: 14px;
+    }
+    
+    .developer-attribution {
+      gap: 0.3rem;
+    }
   }
 }
 
@@ -669,8 +816,30 @@ blockquote {
   background: var(--dark-surface);
   border-top-color: var(--dark-border);
   
-  .text-secondary {
-    color: var(--dark-muted) !important;
+  .footer-link {
+    color: var(--dark-muted);
+    
+    &:hover {
+      color: var(--wmctf-primary);
+    }
+  }
+  
+  .footer-text,
+  .attribution-text {
+    color: var(--dark-muted);
+  }
+  
+  .developer-link {
+    color: var(--dark-text);
+    
+    &:hover {
+      background: rgba(0, 122, 255, 0.15);
+      color: var(--wmctf-primary);
+    }
+  }
+  
+  .footer-divider {
+    background: var(--dark-border);
   }
 }
 

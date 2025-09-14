@@ -65,7 +65,7 @@ export default defineConfig({
       ],
       output: {
         manualChunks: {
-          echarts: ["echarts", "zrender"],
+          echarts: ["echarts"],
         },
       },
       input: {

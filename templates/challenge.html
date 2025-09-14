@@ -49,8 +49,7 @@
       <div>
         <div class="tab-content">
           <div role="tabpanel" class="tab-pane fade show active" id="challenge">
-            <h2 class="challenge-name text-center pt-3">
-              {{ challenge.name }}
+            <h2 class="challenge-name text-center pt-3" x-text="getCleanChallengeName('{{ challenge.name }}')">
             </h2>
             <h3 class="challenge-value text-center">
               {{ challenge.value }}

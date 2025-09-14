@@ -83,6 +83,12 @@ Alpine.data("Challenge", () => ({
     highlight();
   },
 
+  getCleanChallengeName(challengeName) {
+    if (!challengeName) return '';
+    // 移除前缀标签 [EASY], [MEDIUM], [HARD]
+    return challengeName.replace(/^\[(EASY|MEDIUM|HARD)\]\s*/i, '').trim();
+  },
+
   getStyles() {
     let styles = {
       "modal-dialog": true,

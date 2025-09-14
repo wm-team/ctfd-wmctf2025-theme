@@ -20,21 +20,21 @@
     "bootstrap": "^5.3.3",
     "bootstrap-multimodal": "~1.0.4",
     "dayjs": "^1.11.10",
-    "echarts": "^5.4.3",
+    "echarts": "^5.6.0",
     "lolight": "^1.4.0",
     "vue": "^3.4.15"
   },
   "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
     "@vitejs/plugin-vue": "^3.0.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
     "prettier": "^3.2.5",
     "rollup-plugin-copy": "^3.4.0",
     "sass": "^1.49.7",
-    "vite": "^3.0.5",
     "tailwindcss": "^3.4.1",
-    "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.33",
-    "@tailwindcss/forms": "^0.5.7",
-    "@tailwindcss/typography": "^0.5.10",
-    "@tailwindcss/aspect-ratio": "^0.4.2"
+    "vite": "^3.0.5"
   }
 }
