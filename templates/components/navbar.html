@@ -44,6 +44,15 @@
           </a>
         </li>
 
+        {% if is_admin() %}
+        <li class="nav-item">
+          <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ url_for('scoreboard.listing_3d') }}">
+            <i class="fas fa-cube me-1 text-warning"></i>
+            {% trans %}3D Monitor{% endtrans %}
+          </a>
+        </li>
+        {% endif %}
+
         <li class="nav-item">
           <a class="nav-link px-3 py-2 rounded-pill fw-500" href="{{ url_for('users.listing') }}">
             <i class="fas fa-user-friends me-1"></i>

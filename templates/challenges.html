@@ -877,24 +877,81 @@
         
         async loadRecentSolves() {
           try {
-            // Get recent solves from all users
-            const response = await CTFd.fetch('/api/v1/submissions?type=correct');
-            if (response.ok) {
-              const data = await response.json();
-              if (data.success) {
-                // Transform data for display
-                this.recentSolves = data.data.slice(0, 10).map(solve => ({
-                  id: solve.id,
-                  user: solve.team?.name || solve.user?.name || 'Anonymous',
-                  challenge: solve.challenge?.name || 'Unknown Challenge',
-                  value: solve.challenge?.value || 0,
-                  date: solve.date
-                }));
+            // Method 1: Try to get recent solves from scoreboard data (accessible to all users)
+            const scoreboardResponse = await CTFd.fetch('/api/v1/scoreboard/top/15');
+            if (scoreboardResponse.ok) {
+              const scoreboardData = await scoreboardResponse.json();
+              if (scoreboardData.success) {
+                // Get challenges data to map challenge IDs to names
+                let challengesMap = {};
+                try {
+                  const challengesResponse = await CTFd.fetch('/api/v1/challenges');
+                  if (challengesResponse.ok) {
+                    const challengesData = await challengesResponse.json();
+                    if (challengesData.success) {
+                      challengesMap = challengesData.data.reduce((map, challenge) => {
+                        map[challenge.id] = challenge.name;
+                        return map;
+                      }, {});
+                    }
+                  }
+                } catch (e) {
+                  console.log('Could not load challenges for name mapping:', e);
+                }
+                
+                // Extract recent solves from scoreboard data
+                const recentSolves = [];
+                for (const team of Object.values(scoreboardData.data)) {
+                  if (team.solves && team.solves.length > 0) {
+                    // Get the most recent solves from each team
+                    const teamSolves = team.solves
+                      .filter(solve => solve.challenge_id !== null) // Filter out awards
+                      .slice(-2) // Get last 2 solves from each team
+                      .map(solve => ({
+                        id: `${team.id}-${solve.challenge_id}-${solve.date}`,
+                        user: team.name,
+                        challenge: challengesMap[solve.challenge_id] || `题目 ${solve.challenge_id}`,
+                        value: solve.value || 0,
+                        date: solve.date
+                      }));
+                    recentSolves.push(...teamSolves);
+                  }
+                }
+                
+                // Sort by date (most recent first) and take top 8
+                this.recentSolves = recentSolves
+                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                  .slice(0, 8);
+                
+                // If we got some data, return early
+                if (this.recentSolves.length > 0) {
+                  return;
+                }
               }
             }
+            
+            // Method 2: Fallback to current user's own solves
+            const userResponse = await CTFd.fetch('/api/v1/users/me/solves');
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              if (userData.success && userData.data.length > 0) {
+                // Show user's own recent solves as fallback
+                this.recentSolves = userData.data.slice(-5).map(solve => ({
+                  id: solve.id,
+                  user: '{{ User.name }}', // Current user
+                  challenge: solve.challenge?.name || `题目 ${solve.challenge_id}`,
+                  value: solve.challenge?.value || 0,
+                  date: solve.date
+                })).reverse(); // Most recent first
+                return;
+              }
+            }
+            
+            // Method 3: Final fallback - empty state
+            this.recentSolves = [];
+            
           } catch (error) {
             console.log('Error loading recent solves:', error);
-            // Fallback to empty array
             this.recentSolves = [];
           }
         },

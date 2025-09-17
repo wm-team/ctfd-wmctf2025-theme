@@ -1,0 +1,714 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <div class="jumbotron">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h1 class="display-4 fw-bold mb-3 slide-up">
+            <i class="fas fa-cube text-warning me-3"></i>
+            {% trans %}3D Scoreboard{% endtrans %}
+            <span class="badge bg-danger ms-2 fs-6">{% trans %}Admin Only{% endtrans %}</span>
+          </h1>
+          <p class="lead mb-4 slide-up" style="animation-delay: 0.1s;">
+            {% trans %}Experience the competition in immersive 3D! Watch teams solve challenges in real-time.{% endtrans %}
+            <br><small class="text-muted">{% trans %}This page is only accessible to administrators and provides real-time submission monitoring.{% endtrans %}</small>
+          </p>
+        </div>
+        <div class="col-lg-4 text-center d-none d-lg-block">
+          <div class="hero-stats slide-up" style="animation-delay: 0.2s;" x-data="TopRankings" x-init="loadTopRankings()">
+            <div class="d-flex justify-content-center gap-3">
+              <div class="stat-item text-center">
+                <div class="stat-number text-primary fw-bold" style="font-size: 2rem;">🥇</div>
+                <div class="stat-label text-muted small">{% trans %}1st Place{% endtrans %}</div>
+                <div class="stat-name fw-bold small text-primary" x-text="topThree[0]?.name || '-'" style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">-</div>
+                <div class="stat-score small text-muted" x-text="topThree[0]?.score ? topThree[0].score + ' pts' : ''"></div>
+              </div>
+              <div class="stat-item text-center">
+                <div class="stat-number text-secondary fw-bold" style="font-size: 2rem;">🥈</div>
+                <div class="stat-label text-muted small">{% trans %}2nd Place{% endtrans %}</div>
+                <div class="stat-name fw-bold small text-secondary" x-text="topThree[1]?.name || '-'" style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">-</div>
+                <div class="stat-score small text-muted" x-text="topThree[1]?.score ? topThree[1].score + ' pts' : ''"></div>
+              </div>
+              <div class="stat-item text-center">
+                <div class="stat-number text-warning fw-bold" style="font-size: 2rem;">🥉</div>
+                <div class="stat-label text-muted small">{% trans %}3rd Place{% endtrans %}</div>
+                <div class="stat-name fw-bold small text-warning" x-text="topThree[2]?.name || '-'" style="max-width: 80px; overflow: hidden; text-overflow: ellipsis;">-</div>
+                <div class="stat-score small text-muted" x-text="topThree[2]?.score ? topThree[2].score + ' pts' : ''"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    {% include "components/errors.html" %}
+
+    <!-- 3D Scoreboard Container -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 overflow-hidden slide-up">
+          <div class="card-header bg-light border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0 fw-bold">
+                <i class="fas fa-cube text-primary me-2"></i>
+                {% trans %}3D Competition Arena{% endtrans %}
+              </h5>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" @click="resetCamera()">
+                  <i class="fas fa-home me-1"></i>
+                  {% trans %}Reset View{% endtrans %}
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" @click="toggleAutoRotate()">
+                  <i class="fas fa-sync-alt me-1"></i>
+                  <span x-text="autoRotate ? 'Stop Auto' : 'Auto Rotate'"></span>
+                </button>
+                <button class="btn btn-sm btn-outline-success" onclick="testSolveEffectDirect()">
+                  <i class="fas fa-rocket me-1"></i>
+                  {% trans %}Test Effect{% endtrans %}
+                </button>
+                <button class="btn btn-sm btn-outline-info" onclick="toggleFullscreen()">
+                  <i id="fullscreen-icon" class="fas fa-expand me-1"></i>
+                  {% trans %}Fullscreen{% endtrans %}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div id="scoreboard-3d-container" class="position-relative" style="height: 70vh; min-height: 500px;">
+              <!-- Loading Spinner -->
+              <div id="loading-spinner" class="position-absolute top-50 start-50 translate-middle text-center">
+                <div class="spinner-container">
+                  <div class="spinner-circle"></div>
+                  <div class="spinner-circle"></div>
+                  <div class="spinner-circle"></div>
+                </div>
+                <p class="mt-3 text-muted">{% trans %}Loading 3D Arena...{% endtrans %}</p>
+              </div>
+              
+              <!-- 3D Canvas -->
+              <canvas id="scoreboard-3d-canvas" class="w-100 h-100" style="display: none;"></canvas>
+              
+              <!-- Left Panel - Leaderboard -->
+              <div id="leaderboard-panel" class="position-absolute start-0 top-0 m-3" style="width: 320px; height: calc(100% - 24px); display: none;">
+                <div class="card h-100 shadow-lg border-0" style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1);">
+                  <div class="card-header bg-gradient text-white border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h6 class="mb-0 fw-bold">
+                      <i class="fas fa-trophy me-2"></i>
+                      {% trans %}Real-time Leaderboard{% endtrans %}
+                    </h6>
+                  </div>
+                  <div class="card-body p-2 overflow-auto" x-data="LeaderboardPanel" x-init="loadLeaderboard()">
+                    <div id="leaderboard-content">
+                      <!-- Loading state -->
+                      <div x-show="loading" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-light" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-light mt-2 small">{% trans %}Loading rankings...{% endtrans %}</p>
+                      </div>
+                      
+                      <!-- Leaderboard entries -->
+                      <template x-for="(team, index) in teams" :key="team.account_id">
+                        <div class="team-card mb-2 p-2 rounded" :class="index < 3 ? 'bg-warning bg-opacity-25' : 'bg-light bg-opacity-10'">
+                          <div class="d-flex align-items-center">
+                            <div class="rank-badge me-2 text-center" style="min-width: 30px;">
+                              <span class="badge" :class="index === 0 ? 'bg-warning' : index === 1 ? 'bg-secondary' : index === 2 ? 'bg-info' : 'bg-dark'" x-text="index + 1"></span>
+                            </div>
+                            <div class="flex-grow-1">
+                              <div class="team-name fw-bold text-light small" x-text="team.name" style="font-size: 0.85rem;"></div>
+                              <div class="team-score text-light small" x-text="team.score + ' pts'" style="font-size: 0.75rem;"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Right Panel - Activity Feed -->
+              <div id="activity-panel" class="position-absolute end-0 top-0 m-3" style="width: 380px; height: calc(100% - 24px); display: none;">
+                <div class="card h-100 shadow-lg border-0" style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1);">
+                  <div class="card-header bg-gradient text-white border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h6 class="mb-0 fw-bold">
+                      <i class="fas fa-bolt me-2"></i>
+                      {% trans %}Live Activity Feed{% endtrans %}
+                    </h6>
+                  </div>
+                  <div class="card-body p-2 overflow-auto" x-data="ActivityPanel" x-init="loadActivity()">
+                    <div id="activity-content">
+                      <!-- Loading state -->
+                      <div x-show="loading" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-light" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-light mt-2 small">{% trans %}Loading activity...{% endtrans %}</p>
+                      </div>
+                      
+                      <!-- Activity entries -->
+                      <template x-for="(activity, index) in activities" :key="activity.id">
+                        <div class="activity-card mb-2 p-3 rounded position-relative" :class="activity.type === 'correct' ? 'bg-success bg-opacity-20' : 'bg-info bg-opacity-20'">
+                          <!-- Status indicator -->
+                          <div class="position-absolute top-0 start-0 mt-2 ms-2">
+                            <i :class="activity.type === 'correct' ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-danger'" style="font-size: 0.8rem;"></i>
+                          </div>
+                          
+                          <div class="ps-3">
+                            <!-- Team and Challenge -->
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                              <div>
+                                <div class="fw-bold text-light small" x-text="activity.team_name" style="font-size: 0.85rem;"></div>
+                                <div class="text-light-emphasis small" x-text="activity.challenge_name" style="font-size: 0.75rem;"></div>
+                              </div>
+                              <div class="text-end">
+                                <div class="badge bg-primary small" x-text="'+' + activity.challenge_value + ' pts'" style="font-size: 0.7rem;"></div>
+                              </div>
+                            </div>
+                            
+                            <!-- Time -->
+                            <div class="d-flex justify-content-between align-items-center">
+                              <small class="text-light-emphasis" x-text="activity.time_ago" style="font-size: 0.7rem;"></small>
+                              <small class="text-light-emphasis" x-text="activity.submitted_time" style="font-size: 0.7rem;"></small>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Challenge Info Panel -->
+              <div id="challenge-info-panel" class="position-absolute top-0 end-0 m-3" style="display: none;">
+                <div class="card shadow-lg" style="min-width: 300px;">
+                  <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                      <i class="fas fa-flag me-2"></i>
+                      <span id="challenge-name">Challenge Name</span>
+                    </h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <small class="text-muted">{% trans %}Category{% endtrans %}</small>
+                        <div class="fw-bold" id="challenge-category">Web</div>
+                      </div>
+                      <div class="col-6">
+                        <small class="text-muted">{% trans %}Points{% endtrans %}</small>
+                        <div class="fw-bold text-primary" id="challenge-points">100</div>
+                      </div>
+                      <div class="col-6">
+                        <small class="text-muted">{% trans %}Solves{% endtrans %}</small>
+                        <div class="fw-bold text-success" id="challenge-solves">5</div>
+                      </div>
+                      <div class="col-6">
+                        <small class="text-muted">{% trans %}Difficulty{% endtrans %}</small>
+                        <div class="fw-bold" id="challenge-difficulty">Medium</div>
+                      </div>
+                    </div>
+                    <div class="mt-3">
+                      <small class="text-muted">{% trans %}Description{% endtrans %}</small>
+                      <div class="small" id="challenge-description">Challenge description here...</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Team Movement Notification -->
+              <div id="team-movement-notification" class="position-absolute top-50 start-50 translate-middle" style="display: none;">
+                <div class="alert alert-success shadow-lg text-center" style="min-width: 300px;">
+                  <div class="d-flex align-items-center justify-content-center">
+                    <i class="fas fa-rocket text-success me-3" style="font-size: 2rem;"></i>
+                    <div>
+                      <h5 class="mb-1" id="team-name">Team Name</h5>
+                      <p class="mb-0" id="team-action">正在解题中...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fireworks Container -->
+              <div id="fireworks-container" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: none; z-index: 1000;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Activity Feed -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3">
+          <div class="card-header bg-light border-0 py-3">
+            <h5 class="card-title mb-0 fw-bold">
+              <i class="fas fa-broadcast-tower text-primary me-2"></i>
+              {% trans %}Live Activity Feed{% endtrans %}
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div id="activity-feed" class="p-3" style="max-height: 200px; overflow-y: auto;" x-data="ActivityFeed" x-init="init()">
+              <template x-for="activity in activities" :key="activity.id">
+                <div class="d-flex align-items-center mb-2 p-2 rounded activity-item" :class="{
+                  'bg-success bg-opacity-10': activity.type === 'solve',
+                  'bg-warning bg-opacity-10': activity.type === 'attempt',
+                  'bg-info bg-opacity-10': activity.type === 'first_blood'
+                }">
+                  <div class="me-3">
+                    <template x-if="activity.type === 'solve'">
+                      <i class="fas fa-check-circle text-success"></i>
+                    </template>
+                    <template x-if="activity.type === 'attempt'">
+                      <i class="fas fa-exclamation-triangle text-warning"></i>
+                    </template>
+                    <template x-if="activity.type === 'first_blood'">
+                      <i class="fas fa-medal text-warning"></i>
+                    </template>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="fw-bold small" x-text="activity.team"></div>
+                    <div class="small text-muted" x-text="activity.message"></div>
+                  </div>
+                  <div class="small text-muted" x-text="activity.time"></div>
+                </div>
+              </template>
+              <div x-show="activities.length === 0" class="text-center text-muted py-3">
+                <i class="fas fa-info-circle me-2"></i>
+                {% trans %}No recent activity{% endtrans %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Panel -->
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3">
+          <div class="card-body text-center">
+            <i class="fas fa-trophy text-warning mb-2" style="font-size: 2rem;"></i>
+            <h4 class="fw-bold text-primary" x-text="totalTeams">0</h4>
+            <p class="text-muted mb-0">{% trans %}Total Teams{% endtrans %}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3">
+          <div class="card-body text-center">
+            <i class="fas fa-flag text-success mb-2" style="font-size: 2rem;"></i>
+            <h4 class="fw-bold text-success" x-text="totalSolves">0</h4>
+            <p class="text-muted mb-0">{% trans %}Total Solves{% endtrans %}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-3">
+          <div class="card-body text-center">
+            <i class="fas fa-puzzle-piece text-info mb-2" style="font-size: 2rem;"></i>
+            <h4 class="fw-bold text-info" x-text="totalChallenges">0</h4>
+            <p class="text-muted mb-0">{% trans %}Total Challenges{% endtrans %}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* 3D Scoreboard specific styles */
+    .min-vh-25 {
+      min-height: 25vh;
+    }
+
+    .hero-stats {
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(10px);
+    }
+
+    #scoreboard-3d-container {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+    }
+
+    #scoreboard-3d-canvas {
+      cursor: grab;
+    }
+
+    #scoreboard-3d-canvas:active {
+      cursor: grabbing;
+    }
+
+    .activity-item {
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .activity-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .activity-item.bg-success {
+      border-left-color: var(--bs-success);
+    }
+
+    .activity-item.bg-warning {
+      border-left-color: var(--bs-warning);
+    }
+
+    .activity-item.bg-info {
+      border-left-color: var(--bs-info);
+    }
+
+    /* Fireworks styles */
+    .firework {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .firework-trail {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* Dark mode adjustments */
+    [data-bs-theme="dark"] .hero-stats {
+      background: rgba(28, 28, 30, 0.6);
+    }
+
+    [data-bs-theme="dark"] #scoreboard-3d-container {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    }
+
+    [data-bs-theme="dark"] .card {
+      background: var(--dark-card) !important;
+      border-color: var(--dark-border) !important;
+    }
+
+    [data-bs-theme="dark"] .card-header.bg-light {
+      background: var(--dark-surface) !important;
+      color: var(--dark-text) !important;
+    }
+
+    [data-bs-theme="dark"] .card-title {
+      color: var(--dark-text) !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      #scoreboard-3d-container {
+        height: 50vh !important;
+        min-height: 300px !important;
+      }
+
+      #challenge-info-panel {
+        position: relative !important;
+        margin: 1rem !important;
+      }
+
+      #challenge-info-panel .card {
+        min-width: auto !important;
+      }
+    }
+
+    /* Animation keyframes */
+    @keyframes slideInFromRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInFromLeft {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .slide-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .slide-in-right {
+      animation: slideInFromRight 0.5s ease-out;
+    }
+
+    .slide-in-left {
+      animation: slideInFromLeft 0.5s ease-out;
+    }
+  </style>
+
+  <script>
+    // TopRankings Alpine component for real-time top 3 display
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('TopRankings', () => ({
+        topThree: [null, null, null],
+        
+        async loadTopRankings() {
+          try {
+            const response = await CTFd.fetch('/api/v1/scoreboard');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data.length > 0) {
+                this.topThree = [
+                  data.data[0] || null,
+                  data.data[1] || null, 
+                  data.data[2] || null
+                ];
+              }
+            }
+          } catch (error) {
+            console.log('Error loading top rankings:', error);
+            this.topThree = [null, null, null];
+          }
+        },
+        
+        init() {
+          setInterval(() => {
+            this.loadTopRankings();
+          }, 60000);
+        }
+      }));
+
+      // ActivityFeed Alpine component
+      Alpine.data('ActivityFeed', () => ({
+        activities: [],
+        totalTeams: 0,
+        totalSolves: 0,
+        totalChallenges: 0,
+        
+        async init() {
+          await this.loadStatistics();
+          await this.loadRecentActivity();
+          
+          // Auto-refresh every 30 seconds
+          setInterval(() => {
+            this.loadRecentActivity();
+            this.loadStatistics();
+          }, 30000);
+        },
+        
+        async loadStatistics() {
+          try {
+            // Load scoreboard data for team count
+            const scoreboardResponse = await CTFd.fetch('/api/v1/scoreboard');
+            if (scoreboardResponse.ok) {
+              const scoreboardData = await scoreboardResponse.json();
+              if (scoreboardData.success) {
+                this.totalTeams = scoreboardData.data.length;
+                
+                // Calculate total solves
+                this.totalSolves = scoreboardData.data.reduce((sum, team) => sum + (team.score || 0), 0);
+              }
+            }
+            
+            // Load challenges data
+            const challengesResponse = await CTFd.fetch('/api/v1/challenges');
+            if (challengesResponse.ok) {
+              const challengesData = await challengesResponse.json();
+              if (challengesData.success) {
+                this.totalChallenges = challengesData.data.length;
+              }
+            }
+          } catch (error) {
+            console.log('Error loading statistics:', error);
+          }
+        },
+        
+        async loadRecentActivity() {
+          // This would typically come from a real-time activity API
+          // For now, we'll simulate some activity based on recent solves
+          try {
+            const response = await CTFd.fetch('/api/v1/scoreboard');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data.length > 0) {
+                // Generate some mock activity based on top teams
+                const recentActivity = data.data.slice(0, 3).map((team, index) => ({
+                  id: Date.now() + index,
+                  type: 'solve',
+                  team: team.name,
+                  message: `Solved a challenge (+${Math.floor(Math.random() * 100) + 50} points)`,
+                  time: new Date().toLocaleTimeString()
+                }));
+                
+                this.activities = recentActivity.slice(0, 10);
+              }
+            }
+          } catch (error) {
+            console.log('Error loading recent activity:', error);
+          }
+        },
+        
+        addActivity(activity) {
+          this.activities.unshift(activity);
+          if (this.activities.length > 20) {
+            this.activities = this.activities.slice(0, 20);
+          }
+        }
+      }));
+      
+      // LeaderboardPanel Alpine component
+      Alpine.data('LeaderboardPanel', () => ({
+        teams: [],
+        loading: true,
+        
+        async loadLeaderboard() {
+          try {
+            this.loading = true;
+            const response = await CTFd.fetch('/api/v1/scoreboard');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success) {
+                this.teams = data.data.slice(0, 15); // Show top 15 teams
+              }
+            }
+          } catch (error) {
+            console.log('Error loading leaderboard:', error);
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        init() {
+          this.loadLeaderboard();
+          // Auto-refresh every 30 seconds
+          setInterval(() => {
+            this.loadLeaderboard();
+          }, 30000);
+        }
+      }));
+      
+      // ActivityPanel Alpine component  
+      Alpine.data('ActivityPanel', () => ({
+        activities: [],
+        loading: true,
+        teams: {},
+        challenges: {},
+        previousActivities: new Set(),
+        
+        async loadActivity() {
+          try {
+            this.loading = true;
+            
+            // Load recent submissions (admin only) - no need to load teams/challenges separately
+            const response = await CTFd.fetch('/api/v1/submissions?type=correct');
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success) {
+                // Process submissions - data already contains team and challenge info
+                const newActivities = data.data.map(submission => {
+                  const submittedTime = new Date(submission.date);
+                  const now = new Date();
+                  const diffMs = now - submittedTime;
+                  const timeAgo = this.formatTimeAgo(diffMs);
+                  
+                  return {
+                    id: submission.id,
+                    type: submission.type,
+                    team_name: submission.team?.name || submission.user?.name || `User ${submission.user_id}`,
+                    challenge_name: submission.challenge?.name || `Challenge ${submission.challenge_id}`,
+                    challenge_value: submission.challenge?.value || 0,
+                    submitted_time: submittedTime.toLocaleTimeString('zh-CN', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      second: '2-digit'
+                    }),
+                    time_ago: timeAgo,
+                    timestamp: submittedTime.getTime(),
+                    original_submission: submission // 保留原始数据
+                  };
+                }).sort((a, b) => b.timestamp - a.timestamp); // Latest first
+                
+                // 检测新的解题记录并触发3D特效
+                this.checkForNewSubmissions(newActivities);
+                
+                this.activities = newActivities;
+              }
+            }
+          } catch (error) {
+            console.log('Error loading activity:', error);
+          } finally {
+            this.loading = false;
+          }
+        },
+        
+        checkForNewSubmissions(activities) {
+          // 找到最新的正确解题记录
+          const latestCorrectSolve = activities.find(activity => activity.type === 'correct');
+          
+          if (latestCorrectSolve && window.scoreboard3D) {
+            const submissionId = `${latestCorrectSolve.id}-${latestCorrectSolve.timestamp}`;
+            
+            // 检查是否是新的解题记录
+            if (!this.previousActivities.has(submissionId)) {
+              this.previousActivities.add(submissionId);
+              
+              // 如果不是初始化阶段（即previousActivities不为空），触发特效
+              if (this.previousActivities.size > 1) {
+                console.log('New correct submission detected:', latestCorrectSolve);
+                console.log('Notifying 3D system with submission:', latestCorrectSolve.original_submission);
+                window.scoreboard3D.checkAndTriggerNewSolve(latestCorrectSolve.original_submission);
+              }
+            }
+          }
+        },
+        
+        formatTimeAgo(ms) {
+          const seconds = Math.floor(ms / 1000);
+          const minutes = Math.floor(seconds / 60);
+          const hours = Math.floor(minutes / 60);
+          const days = Math.floor(hours / 24);
+          
+          if (days > 0) return `${days}天前`;
+          if (hours > 0) return `${hours}小时前`;
+          if (minutes > 0) return `${minutes}分钟前`;
+          return `${seconds}秒前`;
+        },
+        
+        init() {
+          this.loadActivity();
+          // Auto-refresh every 15 seconds
+          setInterval(() => {
+            this.loadActivity();
+          }, 15000);
+        }
+      }));
+    });
+  </script>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/scoreboard_3d.js") }}
+{% endblock %}
