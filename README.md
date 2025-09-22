@@ -2,6 +2,31 @@
 
 A beautifully designed, modern CTFd theme inspired by Apple Design principles and tailored for the WMCTF competition. This theme features a contemporary flat design with smooth animations, excellent user experience, and full responsive support.
 
+> 🏆 **Production Verified**: This theme has been successfully deployed and tested in **WMCTF 2025** competition at [wmctf.wm-team.cn](https://wmctf.wm-team.cn/), serving hundreds of participants with excellent performance and user experience.
+
+## 📸 Screenshots & Demo
+
+### Live Demo
+🌐 **Experience it live**: [WMCTF 2025 Platform](https://wmctf.wm-team.cn/)
+
+### Theme Showcase
+
+#### Challenge Page
+<!-- Add your challenge page screenshot here -->
+![Challenges](./screenshots/challenges.png)
+*Beautiful challenge cards with difficulty indicators and smooth animations*
+
+#### Scoreboard
+<!-- Add your scoreboard screenshot here -->
+![Scoreboard](./screenshots/scoreboard.png)
+*Engaging leaderboard with ranking badges and progress visualization*
+
+
+#### Dark Mode Support
+<!-- Add your dark mode screenshot here -->
+![Dark Mode](./screenshots/darkmode.png)
+*Full dark mode support with automatic theme switching*
+
 ## 🎨 Design Features
 
 ### Modern Apple-Inspired Design
@@ -174,8 +199,23 @@ Full dark mode support with automatic theme switching:
 
 ## 📄 License
 
-This theme is built upon the CTFd core theme and follows the same licensing terms. The custom WMCTF branding and enhancements are designed specifically for the WMCTF competition.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+
+The custom WMCTF branding and enhancements are designed specifically for the WMCTF competition.
+
+## 🎉 Production Success
+
+**WMCTF 2025 Achievement**: This theme has been successfully deployed and battle-tested in the real-world WMCTF 2025 competition:
+
+- 🌐 **Live Platform**: [wmctf.wm-team.cn](https://wmctf.wm-team.cn/)
+- 👥 **Participants**: Successfully served hundreds of CTF participants
+- ⚡ **Performance**: Excellent loading speeds and responsive design
+- 🔧 **Stability**: Zero major issues during the competition period
+- 📱 **Cross-platform**: Perfect compatibility across all devices and browsers
+- 🎯 **User Experience**: Received positive feedback from participants for its modern design and intuitive interface
+
+The theme has proven its reliability, performance, and user-friendliness in a high-stakes competition environment, making it a trusted choice for CTF platforms.
 
 ---
 
-**Created with ❤️ for WMCTF** - A modern, beautiful, and user-friendly CTF platform experience.
+**Created with ❤️ for WMCTF** - A modern, beautiful, and user-friendly CTF platform experience that has been proven in production.
