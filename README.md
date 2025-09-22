@@ -163,6 +163,12 @@ templates/            # Jinja2 templates
 static/               # Compiled assets (generated)
 ```
 
+#### How to use?
+
+```
+git clone https://github.com/wm-team/ctfd-wmctf2025-theme.git CTFd/themes/wmctf2025
+```
+
 ## 🎨 Customization
 
 ### Color Scheme
